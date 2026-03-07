@@ -48,3 +48,5 @@ htmlcov/
 # Distribution
 dist/
 build/
+.env.dev
+.env.*
