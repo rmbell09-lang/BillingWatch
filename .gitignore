@@ -50,3 +50,8 @@ dist/
 build/
 .env.dev
 .env.*
+billingwatch.db-shm
+billingwatch.db-wal
+*.bak-old
+*.db-shm
+*.db-wal
