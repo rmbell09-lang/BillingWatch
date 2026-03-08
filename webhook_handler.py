@@ -24,6 +24,22 @@ import hashlib
 import argparse
 from typing import Any, Dict, List, Optional
 
+try:
+    from src.storage.event_store import EventStore as _EventStore
+    _STORE_AVAILABLE = True
+except ImportError:
+    _STORE_AVAILABLE = False
+
+# Module-level singleton EventStore (lazy-init)
+_store: Any = None
+
+def get_event_store() -> Any:
+    """Return the module-level EventStore, initialising it on first call."""
+    global _store
+    if _store is None and _STORE_AVAILABLE:
+        _store = _EventStore()
+    return _store
+
 # ---------------------------------------------------------------------------
 # Signature validation
 # ---------------------------------------------------------------------------
@@ -171,6 +187,14 @@ def process_webhook(
     except ValueError as exc:
         print(f"[webhook_handler] Signature validation failed: {exc}")
         return {"ok": False, "error": str(exc)}
+
+    # Persist to EventStore for durability and processor replay
+    _es = get_event_store()
+    if _es is not None:
+        try:
+            _es.insert_event(event)
+        except Exception as _es_exc:
+            print(f"[webhook_handler] EventStore insert warning: {_es_exc}")
 
     detectors = _get_detectors()
     all_alerts = []

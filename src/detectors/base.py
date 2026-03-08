@@ -44,5 +44,33 @@ class BaseDetector(ABC):
         """Scheduled check — runs independently of event stream (e.g., every 15 min)."""
         ...
 
+    def bootstrap_from_store(self, store: Any, window_seconds: float = 86400) -> int:
+        """
+        Hydrate in-memory state from EventStore.
+
+        Queries the past ``window_seconds`` of events and replays each one
+        through :meth:`process_event`.  Call this at startup to restore
+        detector state after a process restart.
+
+        Args:
+            store: An :class:`~src.storage.event_store.EventStore` instance.
+            window_seconds: How far back to look (default 24 h).
+
+        Returns:
+            Number of events successfully replayed.
+        """
+        events = store.get_events_since(window_seconds)
+        count = 0
+        for event in events:
+            try:
+                self.process_event(event)
+                count += 1
+            except Exception as exc:
+                self._log(
+                    "bootstrap_from_store: error replaying event "
+                    + str(event.get("id", "?")) + ": " + str(exc)
+                )
+        return count
+
     def _log(self, msg: str):
         print(f"[{self.name}] {msg}")

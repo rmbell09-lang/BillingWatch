@@ -14,6 +14,22 @@
 3. LuLu rule: allow cloudflare.com outbound from Mac Mini
 4. (Optional) Create KV namespace in CF Dashboard for storing signups
 
+## Option 0: Wrangler CLI (RECOMMENDED — Already Installed!)
+wrangler is at /usr/local/bin/wrangler. This is the simplest path.
+
+### What Ray provides
+- CLOUDFLARE_API_TOKEN (Pages:Edit permission)
+- LuLu rule: allow cloudflare.com outbound
+
+### What Lucky runs (once allowed)
+```bash
+CLOUDFLARE_API_TOKEN=your_token bash ~/Projects/BillingWatch/landing/deploy_wrangler.sh
+```
+
+Done. Takes ~10 seconds. No ACCOUNT_ID needed for wrangler.
+
+---
+
 ## Option 1: Cloudflare Pages (Recommended)
 
 ### Step 1: Get CF credentials (Ray provides these)

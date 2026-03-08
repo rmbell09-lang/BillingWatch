@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BillingWatch — Real-time Stripe Anomaly Detection</title>
   <meta name="description" content="BillingWatch watches your Stripe account 24/7 and alerts you the moment something goes wrong — charge failures, silent subscription lapses, revenue drops, or card testing attacks.">
+  <link rel="canonical" href="https://billingwatch.app">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://billingwatch.app">
+  <meta property="og:title" content="BillingWatch — Real-time Stripe Anomaly Detection">
+  <meta property="og:description" content="BillingWatch watches your Stripe account 24/7 and alerts you the moment something goes wrong — charge failures, silent subscription lapses, revenue drops, or card testing attacks.">
+  <meta property="og:image" content="https://billingwatch.app/og-image.png">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BillingWatch — Real-time Stripe Anomaly Detection">
+  <meta name="twitter:description" content="Stop finding out about billing problems from your customers. BillingWatch catches them first.">
+  <meta name="robots" content="index, follow">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -422,6 +434,7 @@
       .hero { padding: 4rem 1.5rem 3rem; }
       section { padding: 3rem 1.5rem; }
     }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
   </style>
 </head>
 <body>
@@ -676,7 +689,8 @@
     <h2>Join the beta. Free while it runs.</h2>
     <p style="color:var(--muted);margin-bottom:0.5rem;font-size:1rem;">Get early access. No credit card. We'll email you your webhook URL and onboarding details.</p>
 
-    <form class="signup-form" id="signup-form">
+    <form class="signup-form" id="signup-form" aria-label="Beta access signup">
+      <label for="email-input" class="sr-only">Email address</label>
       <div class="form-row">
         <input
           type="email"
@@ -685,8 +699,10 @@
           placeholder="you@yourcompany.com"
           required
           autocomplete="email"
+          aria-label="Email address"
+          aria-describedby="form-message"
         >
-        <button type="submit" class="btn-submit" id="submit-btn">Get access →</button>
+        <button type="submit" class="btn-submit" id="submit-btn" aria-label="Request beta access">Get access →</button>
       </div>
       <div class="form-message" id="form-message"></div>
       <p class="form-note">No spam. No credit card. Unsubscribe anytime.</p>
