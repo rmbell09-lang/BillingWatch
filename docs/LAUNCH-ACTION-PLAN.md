@@ -1,5 +1,5 @@
 # BillingWatch Launch Action Plan — Sunday March 8, 2026
-*Written by Lucky | Updated: 11:11 AM ET*
+*Written by Lucky | Updated: 4:41 PM ET — deploy path corrected (use deploy_cf.py, needs CF_ACCOUNT_ID)*
 
 ## STATUS: READY TO DEPLOY — Blocked on 3 things from Ray
 
@@ -24,9 +24,9 @@ Show HN is Tuesday 9 AM ET. You have today + Monday to get this done.
 2. Look at right sidebar — your Account ID is listed there
 3. Copy it
 
-### Step 3: Allow cloudflare.com in LuLu (2 min)
+### Step 3: Allow api.cloudflare.com in LuLu (2 min)
 1. Open LuLu on Mac Mini
-2. Add outbound rule: allow cloudflare.com (or api.cloudflare.com)
+2. Add outbound rule: allow api.cloudflare.com outbound
 3. This is a one-time unlock for the deploy
 
 ### Step 4: Send to Lucky
@@ -37,7 +37,12 @@ CF_ACCOUNT_ID=your_account_id_here
 LuLu: done
 ```
 
-Lucky will run deploy_cf.py and reply with the live URL.
+Lucky will run: 
+(Pure Python — no Node.js or wrangler needed.)
+
+> ⚠️ NOTE: Earlier task #328 said wrangler-only / no account ID needed. That was wrong.
+> Node.js is NOT installed on Mac Mini. deploy_cf.py (Python) is the correct path.
+> It needs BOTH CF_API_TOKEN and CF_ACCOUNT_ID. Updated Mar 8 4:41 PM ET.
 
 ---
 

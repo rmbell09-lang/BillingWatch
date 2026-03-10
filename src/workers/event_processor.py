@@ -25,6 +25,9 @@ from src.detectors.negative_invoice import NegativeInvoiceDetector
 from src.detectors.revenue_drop import RevenueDropDetector
 from src.detectors.silent_lapse import SilentLapseDetector
 from src.detectors.webhook_lag import WebhookLagDetector
+from src.detectors.currency_mismatch import CurrencyMismatchDetector
+from src.detectors.timezone_billing_error import TimezoneBillingErrorDetector
+from src.detectors.plan_downgrade_data_loss import PlanDowngradeDataLossDetector
 
 # ------------------------------------------------------------------
 # Configuration
@@ -49,6 +52,9 @@ def build_detectors():
         "revenue_drop": RevenueDropDetector(),
         "silent_lapse": SilentLapseDetector(),
         "webhook_lag": WebhookLagDetector(),
+        "currency_mismatch": CurrencyMismatchDetector(),
+        "timezone_billing_error": TimezoneBillingErrorDetector(),
+        "plan_downgrade_data_loss": PlanDowngradeDataLossDetector(),
     }
 
 
