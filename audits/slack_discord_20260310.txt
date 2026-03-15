@@ -1,0 +1,42 @@
+BillingWatch — Slack/Discord Alert Channel Audit
+Implemented: 2026-03-10 04:47 ET by Lucky
+
+Feature: Slack + Discord alert channels (NEXT_TASKS.md #4)
+
+Files changed:
+  + src/alerting/slack_discord.py   — SlackAlerter + DiscordAlerter classes
+  ~ src/alerting/webhook.py         — Added AlertDispatcherV2 (extends AlertDispatcher)
+  ~ src/api/routes/webhooks.py      — Import changed to AlertDispatcherV2
+
+What was built:
+  SlackAlerter:
+    - Reads SLACK_WEBHOOK_URL from env
+    - Builds Slack-native payload (text + attachments + color-coded severity)
+    - Handles 200-299 responses
+
+  DiscordAlerter:
+    - Reads DISCORD_WEBHOOK_URL from env
+    - Builds Discord-native payload (content + embeds with color)
+    - Handles 200 + 204 (No Content) responses
+
+  AlertDispatcherV2:
+    - Extends AlertDispatcher (keeps email + generic webhook)
+    - Adds Slack + Discord as first-class channels
+    - dispatch() returns per-channel bool results
+    - dispatch_batch() returns per-channel success counts
+
+Activation:
+  Set env vars SLACK_WEBHOOK_URL and/or DISCORD_WEBHOOK_URL
+  No code changes needed — auto-activates when URL is present
+
+Smoke test:
+  - Syntax OK: slack_discord.py + webhook.py
+  - SlackAlerter().is_configured = False (no URL, expected)
+  - _slack_payload() → has 'attachments' key ✓
+  - _discord_payload() → has 'embeds' key, color=15105570 for 'high' ✓
+  - App startup: curl http://127.0.0.1:8099/health → 200 OK ✓
+
+Usage for Ray:
+  export SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+  export DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+  (Add to .env or start-production.sh)

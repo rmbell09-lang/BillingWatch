@@ -192,3 +192,48 @@ class AlertDispatcher:
                 if ok:
                     counts[channel] += 1
         return counts
+
+
+# ─── Updated AlertDispatcher with Slack + Discord ─────────────────────────────
+
+class AlertDispatcherV2(AlertDispatcher):
+    """
+    Extended dispatcher that adds Slack and Discord as first-class channels.
+
+    Channels activated by env vars:
+        SLACK_WEBHOOK_URL   — Slack incoming webhook
+        DISCORD_WEBHOOK_URL — Discord webhook
+
+    Inherits email + generic webhook from AlertDispatcher.
+    """
+
+    def __init__(
+        self,
+        email_alerter=None,
+        webhook_alerter=None,
+        slack_alerter=None,
+        discord_alerter=None,
+    ):
+        super().__init__(email_alerter=email_alerter, webhook_alerter=webhook_alerter)
+        from .slack_discord import SlackAlerter, DiscordAlerter
+        self._slack = slack_alerter or SlackAlerter()
+        self._discord = discord_alerter or DiscordAlerter()
+
+    def dispatch(self, alert: Alert) -> Dict[str, bool]:
+        """Send alert to all configured channels (email, webhook, Slack, Discord)."""
+        results = super().dispatch(alert)
+        if self._slack.is_configured:
+            results["slack"] = self._slack.send(alert)
+        if self._discord.is_configured:
+            results["discord"] = self._discord.send(alert)
+        return results
+
+    def dispatch_batch(self, alerts: List[Alert]) -> Dict[str, int]:
+        """Send multiple alerts to all channels. Returns per-channel success counts."""
+        counts: Dict[str, int] = {"email": 0, "webhook": 0, "slack": 0, "discord": 0}
+        for alert in alerts:
+            results = self.dispatch(alert)
+            for channel, ok in results.items():
+                if ok:
+                    counts[channel] = counts.get(channel, 0) + 1
+        return counts

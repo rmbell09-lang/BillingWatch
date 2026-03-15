@@ -1,0 +1,24 @@
+# Mac Mini Security Check — 2026-03-10 05:49 AM ET
+
+## Open Ports (localhost-bound check)
+All services PASS — all on 127.0.0.1:
+
+| Service      | Address              | Status |
+|--------------|----------------------|--------|
+| Mission Ctrl | 127.0.0.1:3000       | ✅ loopback |
+| Jinx         | 127.0.0.1:3001       | ✅ loopback |
+| Prompt Track | 127.0.0.1:3002       | ✅ loopback |
+| BillingWatch | 127.0.0.1:8000       | ✅ loopback |
+| BW Landing   | 127.0.0.1:8080       | ✅ loopback |
+| TradeSight   | 127.0.0.1:5001       | ✅ loopback |
+| InkForge     | 127.0.0.1:5050       | ✅ loopback |
+| Ollama       | 127.0.0.1:11434      | ✅ loopback |
+| NordVPN      | 100.90.7.148:49111   | ✅ mesh VPN only |
+
+No public-facing ports. CLEAN.
+
+## SSH Auth Log (past 6h)
+No failed SSH attempts found. CLEAN.
+
+## Verdict: SECURE ✅
+All services localhost-bound. No SSH brute force activity.

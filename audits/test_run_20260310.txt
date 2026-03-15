@@ -1,0 +1,195 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0 -- /Library/Developer/CommandLineTools/usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/luckyai/Projects/BillingWatch
+collecting ... collected 126 items
+
+tests/test_alerting.py::TestEmailAlerter::test_is_configured_returns_false_when_missing_fields PASSED [  0%]
+tests/test_alerting.py::TestEmailAlerter::test_is_configured_returns_true_when_all_set PASSED [  1%]
+tests/test_alerting.py::TestEmailAlerter::test_send_skips_when_not_configured PASSED [  2%]
+tests/test_alerting.py::TestEmailAlerter::test_send_success PASSED       [  3%]
+tests/test_alerting.py::TestEmailAlerter::test_send_returns_false_on_smtp_error PASSED [  3%]
+tests/test_alerting.py::TestEmailAlerter::test_send_batch_returns_success_count PASSED [  4%]
+tests/test_alerting.py::TestEmailAlerter::test_build_text_contains_key_fields PASSED [  5%]
+tests/test_alerting.py::TestEmailAlerter::test_build_html_contains_key_fields PASSED [  6%]
+tests/test_alerting.py::TestEmailAlerter::test_to_addrs_parsed_from_comma_string PASSED [  7%]
+tests/test_alerting.py::TestWebhookAlerter::test_is_configured_false_when_no_url PASSED [  7%]
+tests/test_alerting.py::TestWebhookAlerter::test_is_configured_true_with_url PASSED [  8%]
+tests/test_alerting.py::TestWebhookAlerter::test_send_skips_when_not_configured PASSED [  9%]
+tests/test_alerting.py::TestWebhookAlerter::test_send_success PASSED     [ 10%]
+tests/test_alerting.py::TestWebhookAlerter::test_send_returns_false_on_non_2xx PASSED [ 11%]
+tests/test_alerting.py::TestWebhookAlerter::test_send_returns_false_on_network_error PASSED [ 11%]
+tests/test_alerting.py::TestWebhookAlerter::test_hmac_signature_in_headers_when_secret_set PASSED [ 12%]
+tests/test_alerting.py::TestWebhookAlerter::test_payload_has_slack_and_discord_fields PASSED [ 13%]
+tests/test_alerting.py::TestWebhookAlerter::test_payload_severity_colors PASSED [ 14%]
+tests/test_alerting.py::TestWebhookAlerter::test_send_batch_returns_count PASSED [ 15%]
+tests/test_alerting.py::TestAlertDispatcher::test_dispatch_calls_both_channels PASSED [ 15%]
+tests/test_alerting.py::TestAlertDispatcher::test_dispatch_skips_unconfigured_channels PASSED [ 16%]
+tests/test_alerting.py::TestAlertDispatcher::test_dispatch_batch_aggregates_counts PASSED [ 17%]
+tests/test_alerting.py::TestAlertDispatcher::test_dispatch_handles_no_channels_configured PASSED [ 18%]
+tests/test_detectors/test_all_detectors.py::TestChargeFailureDetector::test_no_alert_below_min_events PASSED [ 19%]
+tests/test_detectors/test_all_detectors.py::TestChargeFailureDetector::test_no_alert_below_threshold PASSED [ 19%]
+tests/test_detectors/test_all_detectors.py::TestChargeFailureDetector::test_alert_above_threshold PASSED [ 20%]
+tests/test_detectors/test_all_detectors.py::TestChargeFailureDetector::test_alert_metadata PASSED [ 21%]
+tests/test_detectors/test_all_detectors.py::TestChargeFailureDetector::test_cooldown_prevents_duplicate_alerts PASSED [ 22%]
+tests/test_detectors/test_all_detectors.py::TestChargeFailureDetector::test_unrelated_events_ignored PASSED [ 23%]
+tests/test_detectors/test_all_detectors.py::TestChargeFailureDetector::test_check_method_returns_list PASSED [ 23%]
+tests/test_detectors/test_all_detectors.py::TestDuplicateChargeDetector::test_single_charge_no_alert PASSED [ 24%]
+tests/test_detectors/test_all_detectors.py::TestDuplicateChargeDetector::test_two_same_charges_triggers_alert PASSED [ 25%]
+tests/test_detectors/test_all_detectors.py::TestDuplicateChargeDetector::test_different_amounts_no_alert PASSED [ 26%]
+tests/test_detectors/test_all_detectors.py::TestDuplicateChargeDetector::test_different_customers_no_alert PASSED [ 26%]
+tests/test_detectors/test_all_detectors.py::TestDuplicateChargeDetector::test_same_charge_id_not_double_counted PASSED [ 27%]
+tests/test_detectors/test_all_detectors.py::TestDuplicateChargeDetector::test_alert_includes_charge_ids PASSED [ 28%]
+tests/test_detectors/test_all_detectors.py::TestDuplicateChargeDetector::test_check_returns_empty PASSED [ 29%]
+tests/test_detectors/test_all_detectors.py::TestFraudSpikeDetector::test_no_alert_below_threshold PASSED [ 30%]
+tests/test_detectors/test_all_detectors.py::TestFraudSpikeDetector::test_absolute_threshold_triggers PASSED [ 30%]
+tests/test_detectors/test_all_detectors.py::TestFraudSpikeDetector::test_rate_threshold_triggers PASSED [ 31%]
+tests/test_detectors/test_all_detectors.py::TestFraudSpikeDetector::test_efw_alert PASSED [ 32%]
+tests/test_detectors/test_all_detectors.py::TestFraudSpikeDetector::test_check_returns_list PASSED [ 33%]
+tests/test_detectors/test_all_detectors.py::TestNegativeInvoiceDetector::test_small_refund_no_alert PASSED [ 34%]
+tests/test_detectors/test_all_detectors.py::TestNegativeInvoiceDetector::test_large_refund_triggers_alert PASSED [ 34%]
+tests/test_detectors/test_all_detectors.py::TestNegativeInvoiceDetector::test_negative_invoice_always_alerts PASSED [ 35%]
+tests/test_detectors/test_all_detectors.py::TestNegativeInvoiceDetector::test_positive_invoice_no_alert PASSED [ 36%]
+tests/test_detectors/test_all_detectors.py::TestNegativeInvoiceDetector::test_customer_daily_limit PASSED [ 37%]
+tests/test_detectors/test_all_detectors.py::TestNegativeInvoiceDetector::test_check_returns_list PASSED [ 38%]
+tests/test_detectors/test_all_detectors.py::TestRevenueDrop::test_no_alert_insufficient_history PASSED [ 38%]
+tests/test_detectors/test_all_detectors.py::TestRevenueDrop::test_no_alert_normal_revenue PASSED [ 39%]
+tests/test_detectors/test_all_detectors.py::TestRevenueDrop::test_alert_on_revenue_drop PASSED [ 40%]
+tests/test_detectors/test_all_detectors.py::TestRevenueDrop::test_check_returns_list PASSED [ 41%]
+tests/test_detectors/test_all_detectors.py::TestSilentLapseDetector::test_tracks_subscription_updates PASSED [ 42%]
+tests/test_detectors/test_all_detectors.py::TestSilentLapseDetector::test_tracks_successful_payments PASSED [ 42%]
+tests/test_detectors/test_all_detectors.py::TestSilentLapseDetector::test_check_returns_list PASSED [ 43%]
+tests/test_detectors/test_all_detectors.py::TestSilentLapseDetector::test_lapsed_subscription_detected PASSED [ 44%]
+tests/test_detectors/test_all_detectors.py::TestWebhookLagDetector::test_fresh_event_no_alert PASSED [ 45%]
+tests/test_detectors/test_all_detectors.py::TestWebhookLagDetector::test_warning_lag_triggers_alert PASSED [ 46%]
+tests/test_detectors/test_all_detectors.py::TestWebhookLagDetector::test_critical_lag_triggers_critical_alert PASSED [ 46%]
+tests/test_detectors/test_all_detectors.py::TestWebhookLagDetector::test_metadata_contains_lag_info PASSED [ 47%]
+tests/test_detectors/test_all_detectors.py::TestWebhookLagDetector::test_event_without_created_no_crash PASSED [ 48%]
+tests/test_detectors/test_all_detectors.py::TestWebhookLagDetector::test_check_no_silence_if_recent_event PASSED [ 49%]
+tests/test_detectors/test_all_detectors.py::TestWebhookLagDetector::test_silence_alert_when_no_events PASSED [ 50%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_no_alert_during_baseline PASSED [ 50%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_no_alert_matching_home_currency PASSED [ 51%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_alert_on_currency_mismatch PASSED [ 52%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_alert_metadata PASSED [ 53%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_cooldown_suppresses_repeat_alert PASSED [ 53%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_invoice_event_also_detected PASSED [ 54%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_event_without_customer_ignored PASSED [ 55%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_unrelated_event_ignored PASSED [ 56%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_currency_normalized_to_uppercase PASSED [ 57%]
+tests/test_detectors/test_all_detectors.py::TestCurrencyMismatchDetector::test_check_returns_empty PASSED [ 57%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_no_alert_on_first_invoice PASSED [ 58%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_alert_on_double_invoice_within_window PASSED [ 59%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_no_alert_outside_double_window PASSED [ 60%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_double_invoice_metadata PASSED [ 61%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_cooldown_suppresses_repeat PASSED [ 61%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_invoice_payment_succeeded_also_triggers PASSED [ 62%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_unrelated_event_ignored PASSED [ 63%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_event_without_subscription_ignored PASSED [ 64%]
+tests/test_detectors/test_all_detectors.py::TestTimezoneBillingErrorDetector::test_check_does_not_raise PASSED [ 65%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_quantity_reduction_fires_alert PASSED [ 65%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_quantity_reduction_metadata PASSED [ 66%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_price_removed_entirely_fires_alert PASSED [ 67%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_tier_regression_fires_alert PASSED [ 68%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_tier_upgrade_no_alert PASSED [ 69%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_quantity_increase_no_alert PASSED [ 69%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_cooldown_suppresses_repeat PASSED [ 70%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_unrelated_event_ignored PASSED [ 71%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_no_previous_attributes_ignored PASSED [ 72%]
+tests/test_detectors/test_all_detectors.py::TestPlanDowngradeDataLossDetector::test_check_returns_empty PASSED [ 73%]
+tests/test_e2e_charge_failure.py::TestChargeFailureE2E::test_01_events_stored_in_eventstore PASSED [ 73%]
+tests/test_e2e_charge_failure.py::TestChargeFailureE2E::test_02_idempotent_insert PASSED [ 74%]
+tests/test_e2e_charge_failure.py::TestChargeFailureE2E::test_03_mark_processed PASSED [ 75%]
+tests/test_e2e_charge_failure.py::TestChargeFailureE2E::test_04_detector_fires_via_process_event PASSED [ 76%]
+tests/test_e2e_charge_failure.py::TestChargeFailureE2E::test_05_full_pipeline_webhook_to_alert PASSED [ 76%]
+tests/test_e2e_charge_failure.py::TestChargeFailureE2E::test_06_get_event_count PASSED [ 77%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_method_present[ChargeFailureDetector] PASSED [ 78%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_method_present[DuplicateChargeDetector] PASSED [ 79%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_method_present[FraudSpikeDetector] PASSED [ 80%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_method_present[NegativeInvoiceDetector] PASSED [ 80%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_method_present[RevenueDropDetector] PASSED [ 81%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_method_present[SilentLapseDetector] PASSED [ 82%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_method_present[WebhookLagDetector] PASSED [ 83%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_empty_store_returns_zero[ChargeFailureDetector] PASSED [ 84%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_empty_store_returns_zero[DuplicateChargeDetector] PASSED [ 84%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_empty_store_returns_zero[FraudSpikeDetector] PASSED [ 85%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_empty_store_returns_zero[NegativeInvoiceDetector] PASSED [ 86%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_empty_store_returns_zero[RevenueDropDetector] PASSED [ 87%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_empty_store_returns_zero[SilentLapseDetector] PASSED [ 88%]
+tests/test_event_store_integration.py::TestBootstrapFromStoreExists::test_empty_store_returns_zero[WebhookLagDetector] PASSED [ 88%]
+tests/test_event_store_integration.py::TestEventStorePersistence::test_insert_and_retrieve PASSED [ 89%]
+tests/test_event_store_integration.py::TestEventStorePersistence::test_idempotent_insert PASSED [ 90%]
+tests/test_event_store_integration.py::TestEventStorePersistence::test_mark_processed PASSED [ 91%]
+tests/test_event_store_integration.py::TestChargeFailureFromStore::test_bootstrap_replays_events PASSED [ 92%]
+tests/test_event_store_integration.py::TestChargeFailureFromStore::test_bootstrap_with_zero_events PASSED [ 92%]
+tests/test_event_store_integration.py::TestDuplicateChargeFromStore::test_bootstrap_detects_duplicate PASSED [ 93%]
+tests/test_event_store_integration.py::TestFraudSpikeFromStore::test_bootstrap_replays_disputes PASSED [ 94%]
+tests/test_event_store_integration.py::TestRevenueDropFromStore::test_bootstrap_loads_revenue_history PASSED [ 95%]
+tests/test_event_store_integration.py::TestSilentLapseFromStore::test_bootstrap_tracks_subscription PASSED [ 96%]
+tests/test_event_store_integration.py::TestWebhookLagFromStore::test_bootstrap_updates_last_event_received PASSED [ 96%]
+tests/test_event_store_integration.py::TestNegativeInvoiceFromStore::test_bootstrap_counts_refunds PASSED [ 97%]
+tests/test_event_store_integration.py::TestBootstrapAll::test_all_seven_detectors_bootstrapped FAILED [ 98%]
+tests/test_event_store_integration.py::TestBootstrapAll::test_run_scheduled_checks_returns_int PASSED [ 99%]
+tests/test_event_store_integration.py::TestBootstrapAll::test_all_detector_names_present FAILED [100%]
+
+=================================== FAILURES ===================================
+____________ TestBootstrapAll.test_all_seven_detectors_bootstrapped ____________
+
+self = <tests.test_event_store_integration.TestBootstrapAll object at 0x108dffbb0>
+tmp_store = <src.storage.event_store.EventStore object at 0x108f22520>
+
+    def test_all_seven_detectors_bootstrapped(self, tmp_store):
+        """bootstrap_all() runs without error across all 7 detectors."""
+        detectors = build_detectors()
+>       assert len(detectors) == 7
+E       AssertionError: assert 10 == 7
+E        +  where 10 = len({'charge_failure': <src.detectors.charge_failure.ChargeFailureDetector object at 0x108f22370>, 'currency_mismatch': <src.detectors.currency_mismatch.CurrencyMismatchDetector object at 0x108eedf10>, 'duplicate_charge': <src.detectors.duplicate_charge.DuplicateChargeDetector object at 0x108f22100>, 'fraud_spike': <src.detectors.fraud_spike.FraudSpikeDetector object at 0x108f22130>, ...})
+
+tests/test_event_store_integration.py:303: AssertionError
+_______________ TestBootstrapAll.test_all_detector_names_present _______________
+
+self = <tests.test_event_store_integration.TestBootstrapAll object at 0x108dff7c0>
+
+    def test_all_detector_names_present(self):
+        detectors = build_detectors()
+        expected = {
+            "charge_failure", "duplicate_charge", "fraud_spike",
+            "negative_invoice", "revenue_drop", "silent_lapse", "webhook_lag",
+        }
+>       assert set(detectors.keys()) == expected
+E       AssertionError: assert {'charge_fail...ta_loss', ...} == {'charge_fail...t_lapse', ...}
+E         
+E         Extra items in the left set:
+E         'timezone_billing_error'
+E         'plan_downgrade_data_loss'
+E         'currency_mismatch'
+E         
+E         Full diff:...
+E         
+E         ...Full output truncated (12 lines hidden), use '-vv' to show
+
+tests/test_event_store_integration.py:319: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_event_store_integration.py::TestBootstrapAll::test_all_seven_detectors_bootstrapped
+FAILED tests/test_event_store_integration.py::TestBootstrapAll::test_all_detector_names_present
+======================== 2 failed, 124 passed in 0.36s =========================
+============================= test session starts ==============================
+platform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0 -- /Library/Developer/CommandLineTools/usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/luckyai/Projects/BillingWatch
+collecting ... collected 3 items
+
+tests/test_event_store_integration.py::TestBootstrapAll::test_all_seven_detectors_bootstrapped PASSED [ 33%]
+tests/test_event_store_integration.py::TestBootstrapAll::test_run_scheduled_checks_returns_int PASSED [ 66%]
+tests/test_event_store_integration.py::TestBootstrapAll::test_all_detector_names_present PASSED [100%]
+
+============================== 3 passed in 0.03s ===============================
+tests/test_event_store_integration.py::TestFraudSpikeFromStore::test_bootstrap_replays_disputes PASSED [ 94%]
+tests/test_event_store_integration.py::TestRevenueDropFromStore::test_bootstrap_loads_revenue_history PASSED [ 95%]
+tests/test_event_store_integration.py::TestSilentLapseFromStore::test_bootstrap_tracks_subscription PASSED [ 96%]
+tests/test_event_store_integration.py::TestWebhookLagFromStore::test_bootstrap_updates_last_event_received PASSED [ 96%]
+tests/test_event_store_integration.py::TestNegativeInvoiceFromStore::test_bootstrap_counts_refunds PASSED [ 97%]
+tests/test_event_store_integration.py::TestBootstrapAll::test_all_seven_detectors_bootstrapped PASSED [ 98%]
+tests/test_event_store_integration.py::TestBootstrapAll::test_run_scheduled_checks_returns_int PASSED [ 99%]
+tests/test_event_store_integration.py::TestBootstrapAll::test_all_detector_names_present PASSED [100%]
+
+============================= 126 passed in 0.32s ==============================

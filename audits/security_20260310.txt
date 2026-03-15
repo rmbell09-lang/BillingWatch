@@ -1,0 +1,44 @@
+=== MAC MINI SECURITY AUDIT ===
+Date: Tue Mar 10 02:44:56 EDT 2026
+
+=== SUMMARY ===
+Status: CLEAN ✅
+- 0 SSH failures in last 24h
+- All listeners on 127.0.0.1 (localhost only) except NordVPN mesh interface (expected)
+- No world-writable files in ~/Projects
+- Only established external connections: NordVPN (expected) + current SSH session from VPS (100.64.76.147)
+
+=== OPEN PORTS / LISTENERS ===
+All bound to 127.0.0.1 (internal only):
+  :5001  — Python (likely TradeSight or BillingWatch sub-service)
+  :8001  — Python
+  :5050  — Python
+  :8000  — Python
+  :8080  — Python (BillingWatch main server)
+  :3002  — Node.js
+  :3000  — Node.js (Mission Control API)
+  :3001  — Node.js (Jinx task runner)
+  :11434 — Ollama (local LLM)
+  :51923 — Ollama (secondary)
+  :52736 — Ollama (tertiary)
+
+External listeners:
+  NordVPN @ 100.90.7.148:49111 — mesh VPN interface (expected)
+
+=== ESTABLISHED EXTERNAL CONNECTIONS ===
+  NordVPN → 54.83.173.71:8884 (AWS, NordVPN infra — expected)
+  NordVPN → 104.18.34.244:443 (Cloudflare, NordVPN API — expected)
+  sshd → 100.64.76.147:55516 (VPS Lucky session — this audit)
+
+=== SSH AUTH LOG (last 24h) ===
+Failed attempts: 0
+Accepted sessions: current Lucky session only
+
+=== WORLD-WRITABLE FILES ===
+None found in ~/Projects (first 2 levels)
+
+=== VERDICT ===
+Machine is clean. No suspicious activity. All open ports are known services.
+NordVPN mesh is the only external-facing listener — consistent with expected config.
+
+Next audit: tomorrow's 2AM cron cycle.

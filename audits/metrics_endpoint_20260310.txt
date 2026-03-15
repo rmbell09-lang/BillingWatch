@@ -1,0 +1,23 @@
+BillingWatch /metrics/detectors — Audit Log
+Date: 2026-03-10 04:12 ET
+
+CHANGE: Enhanced src/api/routes/metrics.py
+  - Added GET /metrics/detectors endpoint
+  - Returns per-detector alert hit counts (total_alerts + by_severity breakdown)
+  - Supports window_hours param (default 24h, max 720h)
+  - Zero-fills all 10 known detectors so dashboard always has full list
+  - Reads from shared _alert_log in webhooks.py
+  - Includes false_positive_note (manual marking in v2 roadmap)
+
+TESTS PASSED:
+  - Empty alert log → all detectors return 0 hits ✓
+  - Mock alert log (3 alerts, 2 detectors) → correct counts ✓
+  - Full app import (src.api.main) → no errors ✓
+  - Route registered: /metrics/detectors ✓
+
+ROUTES ACTIVE:
+  GET /metrics/              — event counts (window-based)
+  GET /metrics/detectors     — per-detector alert hit counts [NEW]
+  GET /metrics/recent-events — last N raw webhook events
+
+No breaking changes to existing /metrics/ endpoint.

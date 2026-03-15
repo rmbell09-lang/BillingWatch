@@ -1,0 +1,28 @@
+=== MAC MINI 7AM SECURITY CHECK — 2026-03-10 07:23 ET ===
+
+--- OPEN PORTS ---
+NordVPN   100.90.7.148:49111   LISTEN  (VPN mesh — expected)
+ollama    127.0.0.1:11434      LISTEN  (localhost-only OK)
+node/MC   127.0.0.1:3000       LISTEN  (localhost-only OK)
+node/Jinx 127.0.0.1:3001       LISTEN  (localhost-only OK)
+node/3002 127.0.0.1:3002       LISTEN  (localhost-only OK)
+Python    127.0.0.1:5001       LISTEN  (localhost-only OK)
+Python    127.0.0.1:5050       LISTEN  (localhost-only OK)
+Ollama    127.0.0.1:51923      LISTEN  (localhost-only OK)
+BillingWatch 127.0.0.1:8000   LISTEN  (localhost-only OK)
+Python/landing 127.0.0.1:8080 LISTEN  (localhost-only OK)
+
+--- SERVICE BINDING ---
+BillingWatch (8000): 127.0.0.1 PASS
+Jinx (3001):         127.0.0.1 PASS
+Mission Control (3000): 127.0.0.1 PASS
+
+--- SSH AUTH LOG (last 6h) ---
+No failures detected. PASS
+
+--- LULU ---
+Running: 7 processes active
+Installed: /Applications/LuLu.app PASS
+
+--- VERDICT: CLEAN ---
+No external listeners beyond VPN mesh. No SSH failures. LuLu active.

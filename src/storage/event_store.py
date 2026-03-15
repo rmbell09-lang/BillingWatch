@@ -15,6 +15,7 @@ Usage:
 
 import json
 import sqlite3
+import threading
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -41,21 +42,54 @@ _CREATE_INDEXES = [
 
 
 class EventStore:
-    """Thread-safe SQLite-backed event store for Stripe webhook events."""
+    """
+    Thread-safe SQLite-backed event store for Stripe webhook events.
+
+    Uses a single shared connection (lazy-init) to avoid file descriptor
+    exhaustion on macOS — the per-call sqlite3.connect() pattern leaks FDs
+    because the context manager commits but doesn't reliably close.
+    """
 
     def __init__(self, db_path: Optional[str] = None):
         self._db_path = str(db_path or _DEFAULT_DB_PATH)
+        self._conn: Optional[sqlite3.Connection] = None
+        self._lock = threading.Lock()
         self._init_db()
 
-    def _connect(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self._db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL;")  # concurrent reads + writes
-        return conn
+    def _get_conn(self) -> sqlite3.Connection:
+        """Return the shared connection, creating it if needed."""
+        if self._conn is None:
+            conn = sqlite3.connect(self._db_path, check_same_thread=False)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA journal_mode=WAL;")
+            conn.execute("PRAGMA synchronous=NORMAL;")
+            self._conn = conn
+        return self._conn
+
+    def _execute(self, sql: str, params: tuple = ()) -> sqlite3.Cursor:
+        """Execute a single statement, reconnecting once on OperationalError."""
+        with self._lock:
+            try:
+                return self._get_conn().execute(sql, params)
+            except sqlite3.OperationalError:
+                # Connection may have gone stale — reset and retry once
+                try:
+                    if self._conn:
+                        self._conn.close()
+                except Exception:
+                    pass
+                self._conn = None
+                return self._get_conn().execute(sql, params)
+
+    def _commit(self) -> None:
+        with self._lock:
+            if self._conn:
+                self._conn.commit()
 
     def _init_db(self) -> None:
         """Create tables and indexes if they don't exist."""
-        with self._connect() as conn:
+        with self._lock:
+            conn = self._get_conn()
             conn.execute(_CREATE_EVENTS_TABLE)
             for idx_sql in _CREATE_INDEXES:
                 conn.execute(idx_sql)
@@ -78,17 +112,16 @@ class EventStore:
         received_at = time.time()
 
         try:
-            with self._connect() as conn:
-                cur = conn.execute(
-                    """
-                    INSERT OR IGNORE INTO events
-                        (event_id, event_type, payload_json, received_at, processed)
-                    VALUES (?, ?, ?, ?, 0)
-                    """,
-                    (event_id, event_type, payload_json, received_at),
-                )
-                conn.commit()
-                return cur.lastrowid or 0
+            cur = self._execute(
+                """
+                INSERT OR IGNORE INTO events
+                    (event_id, event_type, payload_json, received_at, processed)
+                VALUES (?, ?, ?, ?, 0)
+                """,
+                (event_id, event_type, payload_json, received_at),
+            )
+            self._commit()
+            return cur.lastrowid or 0
         except sqlite3.Error as exc:
             print(f"[EventStore] insert_event error: {exc}")
             return 0
@@ -100,13 +133,12 @@ class EventStore:
         Returns True if a row was updated.
         """
         try:
-            with self._connect() as conn:
-                cur = conn.execute(
-                    "UPDATE events SET processed = 1 WHERE event_id = ?",
-                    (event_id,),
-                )
-                conn.commit()
-                return cur.rowcount > 0
+            cur = self._execute(
+                "UPDATE events SET processed = 1 WHERE event_id = ?",
+                (event_id,),
+            )
+            self._commit()
+            return cur.rowcount > 0
         except sqlite3.Error as exc:
             print(f"[EventStore] mark_processed error: {exc}")
             return False
@@ -133,7 +165,7 @@ class EventStore:
         """
         cutoff = time.time() - seconds
         query = "SELECT payload_json FROM events WHERE received_at >= ?"
-        params: List[Any] = [cutoff]
+        params: list = [cutoff]
 
         if event_type:
             query += " AND event_type = ?"
@@ -144,9 +176,8 @@ class EventStore:
         query += " ORDER BY received_at ASC"
 
         try:
-            with self._connect() as conn:
-                rows = conn.execute(query, params).fetchall()
-                return [json.loads(row["payload_json"]) for row in rows]
+            rows = self._execute(query, tuple(params)).fetchall()
+            return [json.loads(row["payload_json"]) for row in rows]
         except sqlite3.Error as exc:
             print(f"[EventStore] get_events_since error: {exc}")
             return []
@@ -159,14 +190,13 @@ class EventStore:
         """Return count of events in the rolling window (lightweight)."""
         cutoff = time.time() - seconds
         query = "SELECT COUNT(*) FROM events WHERE received_at >= ?"
-        params: List[Any] = [cutoff]
+        params: list = [cutoff]
         if event_type:
             query += " AND event_type = ?"
             params.append(event_type)
         try:
-            with self._connect() as conn:
-                row = conn.execute(query, params).fetchone()
-                return row[0] if row else 0
+            row = self._execute(query, tuple(params)).fetchone()
+            return row[0] if row else 0
         except sqlite3.Error as exc:
             print(f"[EventStore] get_event_count error: {exc}")
             return 0
@@ -174,12 +204,11 @@ class EventStore:
     def get_recent(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Return the most recent N events (full payload dicts)."""
         try:
-            with self._connect() as conn:
-                rows = conn.execute(
-                    "SELECT payload_json FROM events ORDER BY received_at DESC LIMIT ?",
-                    (limit,),
-                ).fetchall()
-                return [json.loads(row["payload_json"]) for row in rows]
+            rows = self._execute(
+                "SELECT payload_json FROM events ORDER BY received_at DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+            return [json.loads(row["payload_json"]) for row in rows]
         except sqlite3.Error as exc:
             print(f"[EventStore] get_recent error: {exc}")
             return []
@@ -187,8 +216,27 @@ class EventStore:
     def total_count(self) -> int:
         """Total number of stored events."""
         try:
-            with self._connect() as conn:
-                row = conn.execute("SELECT COUNT(*) FROM events").fetchone()
-                return row[0] if row else 0
+            row = self._execute("SELECT COUNT(*) FROM events").fetchone()
+            return row[0] if row else 0
         except sqlite3.Error as exc:
             return 0
+
+    def get_counts_by_type(self, window_sec: Optional[float] = None) -> dict:
+        """
+        Return a dict of {event_type: count} for events in the given window.
+        If window_sec is None, counts all events.
+        """
+        try:
+            if window_sec is not None:
+                cutoff = time.time() - window_sec
+                rows = self._execute(
+                    "SELECT event_type, COUNT(*) FROM events WHERE received_at >= ? GROUP BY event_type ORDER BY COUNT(*) DESC",
+                    (cutoff,),
+                ).fetchall()
+            else:
+                rows = self._execute(
+                    "SELECT event_type, COUNT(*) FROM events GROUP BY event_type ORDER BY COUNT(*) DESC"
+                ).fetchall()
+            return {row[0]: row[1] for row in rows}
+        except Exception:
+            return {}

@@ -10,6 +10,8 @@ from typing import Any, Dict, List
 
 import stripe
 from fastapi import APIRouter, Header, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from ...detectors.charge_failure import ChargeFailureDetector
 from ...detectors.duplicate_charge import DuplicateChargeDetector
@@ -19,26 +21,58 @@ from ...detectors.revenue_drop import RevenueDropDetector
 from ...detectors.silent_lapse import SilentLapseDetector
 from ...detectors.webhook_lag import WebhookLagDetector
 from ...storage.event_store import EventStore
-from ...alerting.webhook import AlertDispatcher
+from ...alerting.webhook import AlertDispatcherV2 as AlertDispatcher
 
 # Persistent SQLite event store
 _event_store = EventStore()
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
+limiter = Limiter(key_func=get_remote_address)
 
-# All detectors registered — single source of truth
-_detectors = {
-    "charge_failure": ChargeFailureDetector(),
-    "duplicate_charge": DuplicateChargeDetector(),
-    "fraud_spike": FraudSpikeDetector(),
-    "negative_invoice": NegativeInvoiceDetector(),
-    "revenue_drop": RevenueDropDetector(),
-    "silent_lapse": SilentLapseDetector(),
-    "webhook_lag": WebhookLagDetector(),
-}
+from ...storage.thresholds import ThresholdStore as _ThresholdStore
+
+_threshold_store = _ThresholdStore()
+
+
+def _build_detectors(t: dict) -> dict:
+    """Instantiate all detectors with the given threshold config."""
+    return {
+        "charge_failure": ChargeFailureDetector(config={
+            "failure_threshold": t.get("charge_failure_rate", 0.15),
+        }),
+        "duplicate_charge": DuplicateChargeDetector(config={
+            "duplicate_threshold": t.get("duplicate_threshold", 2),
+        }),
+        "fraud_spike": FraudSpikeDetector(config={
+            "dispute_rate_threshold": t.get("dispute_rate_threshold", 0.01),
+        }),
+        "negative_invoice": NegativeInvoiceDetector(config={
+            "refund_rate_threshold": t.get("refund_rate_threshold", 0.10),
+            "large_refund_threshold_cents": int(t.get("large_refund_usd", 500.0) * 100),
+        }),
+        "revenue_drop": RevenueDropDetector(config={
+            "drop_threshold": t.get("revenue_drop_pct", 0.15),
+        }),
+        "silent_lapse": SilentLapseDetector(),
+        "webhook_lag": WebhookLagDetector(config={
+            "warning_lag_seconds": t.get("webhook_lag_warning_s", 300),
+            "critical_lag_seconds": t.get("webhook_lag_critical_s", 1800),
+        }),
+    }
+
+
+# All detectors registered — single source of truth; initialized from persisted thresholds
+_detectors = _build_detectors(_threshold_store.get())
+
+
+def reload_detectors(thresholds: dict) -> None:
+    """Re-initialize all detectors with updated thresholds (called by config route)."""
+    global _detectors
+    _detectors = _build_detectors(thresholds)
 
 # In-memory alert log (last 500 alerts); replace with DB in v2
 _alert_log: List[Dict[str, Any]] = []
+_alert_id_counter: int = 0
 
 # Alert dispatcher — reads ALERT_EMAIL_* and ALERT_WEBHOOK_URL from env at first use
 _dispatcher = AlertDispatcher()
@@ -52,6 +86,7 @@ def _get_webhook_secret() -> str:
 
 
 @router.post("/stripe", status_code=status.HTTP_200_OK)
+@limiter.limit("30/minute")
 async def stripe_webhook(
     request: Request,
     stripe_signature: str = Header(None, alias="Stripe-Signature"),
@@ -121,6 +156,9 @@ async def stripe_webhook(
     for alert in alerts:
         entry = alert.to_dict()
         entry["stripe_event_id"] = event_dict.get("id")
+        global _alert_id_counter
+        _alert_id_counter += 1
+        entry["alert_id"] = _alert_id_counter
         _alert_log.append(entry)
         # Trim to last 500
         if len(_alert_log) > 500:
@@ -158,3 +196,17 @@ async def list_detectors():
         "detectors": list(_detectors.keys()),
         "count": len(_detectors),
     }
+
+
+# ---------------------------------------------------------------------------
+# Wire demo seed routes onto the demo router (must happen after module load)
+# ---------------------------------------------------------------------------
+from . import demo as _demo_module
+from .demo_seed import register_seed_routes as _register_seed_routes
+
+_register_seed_routes(
+    router=_demo_module.router,
+    detectors=_detectors,
+    alert_log=_alert_log,
+    event_store=_event_store,
+)

@@ -1,0 +1,27 @@
+BillingWatch v1.1 — Dashboard UI Feature Audit
+Implemented: 2026-03-10 04:43 ET by Lucky
+
+Feature: Historical Dashboard UI (NEXT_TASKS.md #2)
+File: src/api/routes/dashboard.py
+
+What was built:
+- GET /dashboard → HTML page (Chart.js, dark theme, auto-refresh 30s)
+- Visualizations:
+    - 6 stat cards: Events (1h), All-Time Events, Failure Rate, Total/Critical/High Alerts
+    - Bar chart: per-detector alert counts (24h window), color-coded by severity
+    - Doughnut chart: alert severity breakdown (critical/high/medium/low)
+    - Latest alert panel with detector name, severity, timestamp
+- Fetches data from /dashboard/summary + /metrics/detectors via JS
+- Status badge (healthy / warning / critical / no_data) in header
+- Color-coded failure rate (green < 5%, yellow 5-15%, red > 15%)
+- Existing /dashboard/summary JSON endpoint preserved
+
+Smoke test:
+- python3 -m uvicorn src.api.main:app --port 8099
+- curl http://127.0.0.1:8099/dashboard → 200 OK
+- Title: <title>BillingWatch Dashboard</title>
+
+Impact: Turns JSON API into a visual product story.
+Essential for Gumroad screenshots and beta user demos.
+
+Next: Slack/Discord alert channel (NEXT_TASKS.md #4, ~2h)

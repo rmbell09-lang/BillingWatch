@@ -1,0 +1,24 @@
+# BillingWatch — GET /onboarding Endpoint
+Date: 2026-03-10 05:52 AM ET
+Task: APPS task 472 — implement onboarding checklist endpoint
+
+## What Was Built
+New endpoint: GET /onboarding/
+File: src/api/routes/onboarding.py
+Registered in: src/api/main.py (also cleaned up duplicate router includes)
+
+## Features
+- 6-step setup checklist (webhook, SMTP, Slack/Discord, thresholds, test, dashboard)
+- Auto-detects configured steps from env vars (STRIPE_WEBHOOK_SECRET, SMTP_HOST, etc.)
+- Returns next_step field pointing to first unconfigured step
+- Includes detailed instructions per step: env vars, Stripe event list, Gmail App Password note
+- Shows steps_completed / steps_total progress
+
+## Verification
+- GET /health → {"status":"ok"} ✅
+- GET /onboarding/ → 200, 6 steps, steps_completed: 1, setup_complete: false ✅  
+  (1 step done = dashboard, which is always available)
+- GET /openapi.json → /onboarding/ endpoint registered ✅
+- Duplicate router includes in main.py cleaned up ✅
+
+## Status: DONE ✅

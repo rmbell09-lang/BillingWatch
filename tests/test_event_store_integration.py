@@ -298,9 +298,9 @@ class TestNegativeInvoiceFromStore:
 class TestBootstrapAll:
 
     def test_all_seven_detectors_bootstrapped(self, tmp_store):
-        """bootstrap_all() runs without error across all 7 detectors."""
+        """bootstrap_all() runs without error across all 10 detectors."""
         detectors = build_detectors()
-        assert len(detectors) == 7
+        assert len(detectors) == 10
         # Should not raise
         bootstrap_all(detectors, tmp_store)
 
@@ -315,5 +315,6 @@ class TestBootstrapAll:
         expected = {
             "charge_failure", "duplicate_charge", "fraud_spike",
             "negative_invoice", "revenue_drop", "silent_lapse", "webhook_lag",
+            "currency_mismatch", "timezone_billing_error", "plan_downgrade_data_loss",
         }
         assert set(detectors.keys()) == expected

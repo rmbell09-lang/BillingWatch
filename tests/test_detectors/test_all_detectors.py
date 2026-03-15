@@ -262,7 +262,7 @@ class TestRevenueDrop:
     def test_no_alert_normal_revenue(self):
         # 3 history days + today (all similar) — no drop
         self._record_days([10_000, 10_000, 10_000])
-        self.d.record_payment(10_000, time.time() - 3600)  # today's revenue
+        self.d.record_payment(10_000, time.time())  # today's revenue
         alerts = self.d.check()
         assert alerts == []
 

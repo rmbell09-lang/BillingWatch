@@ -1,29 +1,35 @@
 # Web framework
-fastapi==0.115.0
-uvicorn[standard]==0.30.0
+fastapi==0.128.8
+uvicorn[standard]==0.32.1
+# Security: starlette vuln GHSA-f96h-pmfr-66vw + GHSA-2c2j-9gv5-cj73 fixed in 0.47.2
+# FastAPI 0.128.8 pulls a compatible starlette; explicit pin ensures minimum safe version
+starlette>=0.47.2
 
 # Stripe
-stripe==10.0.0
+stripe==11.6.0
 # Database
-sqlalchemy==2.0.35
-psycopg2-binary==2.9.9
-alembic==1.13.0
+sqlalchemy==2.0.38
+psycopg2-binary==2.9.10
+alembic==1.14.1
 # Redis / Queue
-redis==5.0.8
+redis==5.2.1
 # Scheduler
-apscheduler==3.10.4
+apscheduler==3.11.0
 # Validation
-pydantic==2.9.0
-pydantic-settings==2.5.0
+pydantic==2.10.6
+pydantic-settings==2.8.1
 # Templates
 jinja2==3.1.6
 # Email
 aiosmtplib==3.0.1
 # HTTP client
-httpx==0.27.2
+httpx==0.28.1
 # Testing
-pytest==8.3.0
-pytest-asyncio==0.23.8
-pytest-cov==5.0.0
+pytest==8.3.5
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
 # Dev utilities
 python-dotenv==1.0.1
+slowapi>=0.1.9
+# Auth
+bcrypt>=4.0.0

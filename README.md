@@ -129,7 +129,10 @@ stripe trigger charge.failed
 | `/webhooks/stripe` | POST | Stripe event ingestion endpoint |
 | `/webhooks/alerts` | GET | Recent anomaly alerts |
 | `/webhooks/detectors` | GET | List registered detectors |
-| `/metrics` | GET | Event counts and detector stats |
+| `/metrics` | GET | Event metrics: `total_events`, `events_by_type`, `uptime_seconds`, `detector_count` |
+| `/metrics?window_hours=N` | GET | Same as above over a custom rolling window (0.1–168 hours) |
+| `/metrics/detectors` | GET | Per-detector alert counts and severity breakdown |
+| `/metrics/recent-events` | GET | Most recent webhook events |
 
 ---
 

@@ -1,0 +1,21 @@
+BillingWatch /dashboard/summary — Audit Log
+Date: 2026-03-10 04:19 ET
+
+ADDED: src/api/routes/dashboard.py
+  - GET /dashboard/summary endpoint
+  - Combines /metrics (event counts), /anomalies/summary (alert log), and /metrics/detectors (per-detector)
+  - Returns: status (healthy/warning/critical/no_data), events (1h + all_time), alerts (total/critical/high/latest), detectors (24h breakdown)
+  - Status logic: critical if any critical alerts, warning if any high alerts, no_data if zero events in 1h, else healthy
+  - Useful for: status page widgets, Uptime Robot checks, morning brief health pulse
+
+UPDATED: src/api/main.py
+  - Added dashboard router import + mount
+
+FUNCTIONAL TEST:
+  - Empty alert log (no live Stripe events in 1h): status=no_data ✓
+  - all_time=130 events from SQLite EventStore ✓  
+  - Per-detector breakdown: 10 detectors, all zero-filled ✓
+  - Route /dashboard/summary registered in app ✓
+
+ROUTES ACTIVE:
+  GET /dashboard/summary  — combined health snapshot [NEW]

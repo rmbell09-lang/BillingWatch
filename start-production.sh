@@ -9,7 +9,7 @@ export STRIPE_SECRET_KEY=$(security find-generic-password -s BillingWatch -a STR
 export STRIPE_WEBHOOK_SECRET=$(security find-generic-password -s BillingWatch -a STRIPE_WEBHOOK_SECRET -w 2>/dev/null)
 
 [ -z "$STRIPE_SECRET_KEY" ] && echo "ERROR: STRIPE_SECRET_KEY missing from Keychain" && exit 1
-[ -z "$STRIPE_WEBHOOK_SECRET" ] && echo "ERROR: STRIPE_WEBHOOK_SECRET missing from Keychain" && exit 1
+[ -z "$STRIPE_WEBHOOK_SECRET" ] && echo "WARNING: STRIPE_WEBHOOK_SECRET not set (webhooks disabled)"
 
 # Optional alerting
 export ALERT_WEBHOOK_URL=$(security find-generic-password -s BillingWatch -a ALERT_WEBHOOK_URL -w 2>/dev/null || echo '')

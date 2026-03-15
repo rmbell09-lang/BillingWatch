@@ -48,8 +48,10 @@ class SilentLapseDetector(BaseDetector):
         event_type = event.get("type", "")
         obj = event.get("data", {}).get("object", {})
 
-        if event_type == "customer.subscription.updated":
+        if event_type in ("customer.subscription.created", "customer.subscription.updated"):
             return self._handle_subscription(obj)
+        elif event_type == "customer.subscription.deleted":
+            return self._handle_subscription_deleted(obj)
         elif event_type == "invoice.payment_succeeded":
             return self._handle_payment(obj)
         return []
@@ -77,6 +79,14 @@ class SilentLapseDetector(BaseDetector):
             "interval_seconds": interval_seconds * interval_count,
             "status": status,
         }
+        return []
+
+    def _handle_subscription_deleted(self, sub: Dict[str, Any]) -> List[Alert]:
+        """Stop tracking a cancelled/deleted subscription."""
+        customer_id = sub.get("customer")
+        if customer_id and customer_id in self._subscriptions:
+            del self._subscriptions[customer_id]
+            self._log(f"Subscription deleted for customer {customer_id} — removed from tracking")
         return []
 
     def _handle_payment(self, invoice: Dict[str, Any]) -> List[Alert]:

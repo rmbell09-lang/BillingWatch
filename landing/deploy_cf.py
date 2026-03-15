@@ -1,76 +1,110 @@
 #!/usr/bin/env python3
-"""Deploy BillingWatch landing page to Cloudflare Pages.
-Usage: CF_API_TOKEN=xxx CF_ACCOUNT_ID=yyy python3 deploy_cf.py
-"""
-import os, sys, zipfile, io, json, urllib.request, pathlib
+"""Deploy to Cloudflare Pages. Reads CF creds from Keychain."""
+import subprocess, os, json, urllib.request, urllib.parse, hashlib, mimetypes, io
 
-API_TOKEN = os.environ.get('CF_API_TOKEN')
-ACCOUNT_ID = os.environ.get('CF_ACCOUNT_ID')
-PROJECT_NAME = 'billingwatch'
-LANDING_DIR = pathlib.Path(__file__).parent
+def get_keychain(service, account):
+    try:
+        r = subprocess.run(["security","find-generic-password","-s",service,"-a",account,"-w"],
+                          capture_output=True, text=True, check=True)
+        return r.stdout.strip()
+    except:
+        return None
 
-if not API_TOKEN or not ACCOUNT_ID:
-    print('ERROR: Set CF_API_TOKEN and CF_ACCOUNT_ID env vars first.')
-    print('See DEPLOY_INSTRUCTIONS.md for details.')
-    sys.exit(1)
-
-HEADERS = {'Authorization': f'Bearer {API_TOKEN}'}
-
-def cf_request(method, path, data=None, headers=None):
-    url = f'https://api.cloudflare.com/client/v4{path}'
-    h = {**HEADERS, **(headers or {})}
-    req = urllib.request.Request(url, data=data, headers=h, method=method)
+def cf_api(method, path, data=None, token=None, raw_body=None, content_type="application/json"):
+    url = "https://api.cloudflare.com/client/v4" + path
+    headers = {"Authorization": "Bearer " + token}
+    body = None
+    if raw_body:
+        headers["Content-Type"] = content_type
+        body = raw_body
+    elif data:
+        headers["Content-Type"] = "application/json"
+        body = json.dumps(data).encode()
+    req = urllib.request.Request(url, data=body, headers=headers, method=method)
     try:
         with urllib.request.urlopen(req) as r:
             return json.loads(r.read())
     except urllib.error.HTTPError as e:
-        return json.loads(e.read())
+        err = e.read().decode()[:500]
+        print("CF API error " + str(e.code) + ": " + err)
+        return None
 
-# 1. Ensure project exists
-print(f'[1/3] Checking Cloudflare Pages project "{PROJECT_NAME}"...')
-res = cf_request('GET', f'/accounts/{ACCOUNT_ID}/pages/projects/{PROJECT_NAME}')
-if not res.get('success'):
-    print(f'      Project not found, creating...')
-    res = cf_request('POST', f'/accounts/{ACCOUNT_ID}/pages/projects',
-        data=json.dumps({'name': PROJECT_NAME, 'production_branch': 'master'}).encode(),
-        headers={'Content-Type': 'application/json'})
-    if not res.get('success'):
-        print('ERROR creating project:', res)
-        sys.exit(1)
-    print(f'      Created: https://{PROJECT_NAME}.pages.dev')
-else:
-    print(f'      Found: https://{PROJECT_NAME}.pages.dev')
+def collect_files(base_dir):
+    files = {}
+    for root, dirs, filenames in os.walk(base_dir):
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        for fn in filenames:
+            if fn.startswith(".") or fn.endswith(".py") or fn.endswith(".sh") or fn.endswith(".json"):
+                continue
+            full = os.path.join(root, fn)
+            rel = "/" + os.path.relpath(full, base_dir)
+            with open(full, "rb") as f:
+                content = f.read()
+            mime = mimetypes.guess_type(fn)[0] or "application/octet-stream"
+            files[rel] = {"content": content, "mime": mime}
+    return files
 
-# 2. Bundle landing dir into zip
-print('[2/3] Bundling landing files...')
-buf = io.BytesIO()
-with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
-    for f in LANDING_DIR.rglob('*'):
-        if f.is_file() and f.suffix in ('.html', '.css', '.js', '.png', '.ico', '.svg', '.txt'):
-            zf.write(f, f.relative_to(LANDING_DIR))
-buf.seek(0)
-print(f'      Bundle size: {len(buf.getvalue()):,} bytes')
+def deploy(project_name, base_dir, token, account):
+    files = collect_files(base_dir)
+    print("Deploying " + str(len(files)) + " files to " + project_name + ".pages.dev...")
+    for path in sorted(files.keys()):
+        print("  " + path)
 
-# 3. Direct upload deployment
-print('[3/3] Deploying to Cloudflare Pages...')
-import urllib.parse
-boundary = 'billingwatch_deploy_boundary'
-body = (
-    f'--{boundary}\r\nContent-Disposition: form-data; name="manifest"\r\n\r\n{{"/_worker.js":""}}\r\n'
-    f'--{boundary}\r\nContent-Disposition: form-data; name="files"; filename="bundle.zip"\r\nContent-Type: application/zip\r\n\r\n'
-).encode() + buf.getvalue() + f'\r\n--{boundary}--\r\n'.encode()
+    # Create project (ignore error if exists)
+    cf_api("POST", "/accounts/" + account + "/pages/projects",
+           {"name": project_name, "production_branch": "main"}, token)
 
-res = cf_request('POST',
-    f'/accounts/{ACCOUNT_ID}/pages/projects/{PROJECT_NAME}/deployments',
-    data=buf.getvalue(),
-    headers={'Content-Type': 'application/zip'})
+    # For CF Pages Direct Upload, we need to use the v2 deploy endpoint
+    # First, get upload URL
+    boundary = "----FormBoundary7MA4YWxk"
+    body_parts = []
+    for path, info in files.items():
+        body_parts.append(("--" + boundary).encode())
+        header = 'Content-Disposition: form-data; name="' + path + '"; filename="' + path + '"'
+        body_parts.append(header.encode())
+        body_parts.append(("Content-Type: " + info["mime"]).encode())
+        body_parts.append(b"")
+        body_parts.append(info["content"])
+    body_parts.append(("--" + boundary + "--").encode())
+    multipart_body = b"\r\n".join(body_parts)
 
-if res.get('success'):
-    d = res.get('result', {})
-    url = d.get('url', f'https://{PROJECT_NAME}.pages.dev')
-    print(f'SUCCESS! Deployed to: {url}')
-else:
-    print('Deployment response:', json.dumps(res, indent=2))
-    print('\nNOTE: For direct upload, you may need to use wrangler:')
-    print(f'  export PATH=/opt/homebrew/bin:~/.npm-global/bin:/usr/bin:/usr/local/bin:/home/openclaw/.local/bin:/bin:/home/openclaw/.npm-global/bin:/home/openclaw/bin:/home/openclaw/.volta/bin:/home/openclaw/.asdf/shims:/home/openclaw/.bun/bin:/home/openclaw/.nvm/current/bin:/home/openclaw/.fnm/current/bin:/home/openclaw/.local/share/pnpm')
-    print(f'  CLOUDFLARE_API_TOKEN={API_TOKEN} wrangler pages deploy {LANDING_DIR} --project-name={PROJECT_NAME}')
+    upload_url = "/accounts/" + account + "/pages/projects/" + project_name + "/deployments"
+    headers = {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "multipart/form-data; boundary=" + boundary,
+    }
+    url = "https://api.cloudflare.com/client/v4" + upload_url
+    req = urllib.request.Request(url, data=multipart_body, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req) as r:
+            result = json.loads(r.read())
+            if result.get("success"):
+                print("")
+                print("Deployed! URL: https://" + project_name + ".pages.dev")
+                return True
+            else:
+                print("Deploy response: " + json.dumps(result.get("errors", [])))
+                return False
+    except urllib.error.HTTPError as e:
+        err = e.read().decode()[:500]
+        print("Deploy error " + str(e.code) + ": " + err)
+        return False
+
+def main():
+    token = get_keychain("BillingWatch-CF-Token", "luckyai")
+    account = get_keychain("BillingWatch-CF-AccountID", "luckyai")
+    if not token or not account:
+        print("ERROR: CF credentials not in Keychain")
+        return
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    project_name = os.path.basename(base_dir)
+    if project_name == "storefront":
+        project_name = "qc-storefront"
+    elif project_name == "landing":
+        project_name = "billingwatch"
+
+    deploy(project_name, base_dir, token, account)
+
+if __name__ == "__main__":
+    main()

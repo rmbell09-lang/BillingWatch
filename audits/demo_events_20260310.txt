@@ -1,0 +1,14 @@
+=== BillingWatch Demo Events Test — 2026-03-10 07:29 ET ===
+Script: scripts/demo_events.py
+Endpoint: /webhooks/stripe (POST)
+
+Scenarios tested:
+  charge_failures: 12x charge.failed -> HTTP 200 each
+  silent_lapse: invoice.payment_failed + subscription.deleted -> HTTP 200
+  refund_spike: 8x charge.refunded -> HTTP 200 each
+  fraud_spike: 15x charge.dispute.created -> HTTP 200 each
+  revenue_drop: 5x payment_intent.succeeded (low amount) -> HTTP 200 each
+
+Detector response:
+{"window_hours":24.0,"alert_log_total":2,"summary":{"total_alerts_in_window":2,"critical":0,"high":2,"medium":0,"low":0},"detectors":{"charge_failure_spike":{"total_alerts":1,"by_severity":{"critical":0,"high":1,"medium":0,"low":0}},"currency_mismatch":{"total_alerts":0,"by_severity":{"critical":0,"high":0,"medium":0,"low":0}},"duplicate_charge":{"total_alerts":0,"by_severity":{"critical":0,"high":0,"medium":0,"low":0}},"fraud_spike":{"total_alerts":1,"by_severity":{"critical":0,"high":1,"medium":0,"low":0}},"negative_invoice":{"total_alerts":0,"by_severity":{"critical":0,"high":0,"medium":0,"low":0}},"plan_downgrade_data_loss":{"total_alerts":0,"by_severity":{"critical":0,"high":0,"medium":0,"low":0}},"revenue_drop":{"total_alerts":0,"by_severity":{"critical":0,"high":0,"medium":0,"low":0}},"silent_lapse":{"total_alerts":0,"by_severity":{"critical":0,"high":0,"medium":0,"low":0}},"timezone_billing_error":{"total_alerts":0,"by_severity":{"critical":0,"high":0,"medium":0,"low":0}},"webhook_lag":{"total_alerts":0,"by_severity":{"critical":0,"high":0,"medium":0,"low":0}}},"false_positive_rates":{"charge_failure_spike":{"false_positives":0,"rate":0.0,"rate_pct":"0.0%"},"currency_mismatch":{"false_positives":0,"rate":0.0,"rate_pct":"0.0%"},"duplicate_charge":{"false_positives":1,"rate":0.0,"rate_pct":"0.0%"},"fraud_spike":{"false_positives":0,"rate":0.0,"rate_pct":"0.0%"},"negative_invoice":{"false_positives":0,"rate":0.0,"rate_pct":"0.0%"},"plan_downgrade_data_loss":{"false_positives":0,"rate":0.0,"rate_pct":"0.0%"},"revenue_drop":{"false_positives":0,"rate":0.0,"rate_pct":"0.0%"},"silent_lapse":{"false_positives":0,"rate":0.0,"rate_pct":"0.0%"},"timezone_billing_error":{"false_positives":0,"rate":0.0,"rate_pct":"0.0%"},"webhook_lag":{"false_positives":1,"rate":0.0,"rate_pct":"0.0%"}}}
+RESULT: PASS — charge_failure_spike detector fired 1 high alert

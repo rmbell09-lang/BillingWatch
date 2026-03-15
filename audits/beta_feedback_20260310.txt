@@ -1,0 +1,24 @@
+BillingWatch — Beta Feedback Tracker Audit
+Implemented: 2026-03-10 04:49 ET by Lucky
+
+Feature: Beta Feedback Tracker (NEXT_TASKS.md #6)
+
+Files:
+  + src/api/routes/beta.py    — POST/GET /beta/feedback + /beta/feedback/summary
+  ~ src/api/main.py           — Registered beta.router
+
+Endpoints:
+  POST /beta/feedback (201)    — submit feedback; writes to billingwatch.db
+  GET  /beta/feedback          — list all feedback (newest first, limit 50)
+  GET  /beta/feedback/summary  — quick stats (total, caught_something, referrals)
+
+Schema (beta_feedback table):
+  id, email, caught_anything, missing_detectors, referral, raw_text, submitted_at
+
+Smoke test:
+  POST /beta/feedback → 201 Created {id:1,status:received,...} ✓
+  GET  /beta/feedback/summary → {total_submissions:1,caught_something:1,...} ✓
+
+Usage for Ray:
+  curl http://localhost:8080/beta/feedback/summary
+  curl http://localhost:8080/beta/feedback | python3 -m json.tool
