@@ -1,0 +1,77 @@
+# render.yaml — BillingWatch free-tier deployment on Render
+# https://render.com/docs/render-yaml-spec
+#
+# ⚠️  SQLITE NOTE: Render's free tier has ephemeral disk storage.
+#     Data (thresholds, event history) will NOT persist across deploys/restarts.
+#     For persistence, add a Render Disk ($1/mo) and set DB_PATH to its mount path,
+#     OR migrate storage to PostgreSQL.
+#
+# DEPLOY:
+#   1. Push this file to repo root as render.yaml
+#   2. New Render Blueprint → connect repo → set secret env vars
+#   3. Required secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+#   4. Optional:  SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS (for email alerts)
+#                 ALERT_WEBHOOK_URL (for Slack/Discord alerts)
+
+services:
+  - type: web
+    name: billingwatch
+    env: python
+    plan: free
+    region: oregon     # change to "ohio" or "frankfurt" if preferred
+
+    # Build
+    buildCommand: pip install -r requirements.txt
+
+    # Start — $PORT is injected by Render
+    startCommand: uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --workers 1
+
+    # Health check endpoint (FastAPI auto-generates docs at /docs, use /health if available)
+    healthCheckPath: /health
+
+    envVars:
+      # ── Stripe (required) ──────────────────────────────────────────────────
+      - key: STRIPE_SECRET_KEY
+        sync: false        # set manually in Render dashboard — never commit
+
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+      # ── Database path ──────────────────────────────────────────────────────
+      # /tmp is writable but ephemeral. For persistence, attach a Render Disk
+      # and update this path to the disk's mount point (e.g. /data/billingwatch.db)
+      - key: DB_PATH
+        value: /tmp/billingwatch.db
+
+      # ── Email alerts (optional) ────────────────────────────────────────────
+      - key: SMTP_HOST
+        value: ""          # e.g. smtp.sendgrid.net
+
+      - key: SMTP_PORT
+        value: "587"
+
+      - key: SMTP_USER
+        value: ""
+
+      - key: SMTP_PASS
+        sync: false        # set in dashboard if using email alerts
+
+      - key: SMTP_USE_TLS
+        value: "true"
+
+      - key: ALERT_EMAIL_FROM
+        value: ""
+
+      - key: ALERT_EMAIL_TO
+        value: ""
+
+      # ── Webhook alerts (optional — Slack/Discord) ──────────────────────────
+      - key: ALERT_WEBHOOK_URL
+        value: ""
+
+      - key: ALERT_WEBHOOK_SECRET
+        sync: false
+
+      # ── Python ────────────────────────────────────────────────────────────
+      - key: PYTHON_VERSION
+        value: "3.12.0"
