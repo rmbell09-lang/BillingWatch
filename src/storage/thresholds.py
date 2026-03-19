@@ -13,12 +13,13 @@ Usage:
     store.patch({"charge_failure_rate": 0.20})  # update one or more
 """
 
+import os
 import sqlite3
 import threading
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-_DEFAULT_DB_PATH = Path(__file__).parent.parent.parent / "billingwatch.db"
+_DEFAULT_DB_PATH = Path(os.environ.get("DB_PATH", "") or str(Path(__file__).parent.parent.parent / "billingwatch.db"))
 
 _CREATE_TABLE = """
 CREATE TABLE IF NOT EXISTS thresholds (

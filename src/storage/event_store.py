@@ -14,6 +14,7 @@ Usage:
 """
 
 import json
+import os
 import sqlite3
 import threading
 import time
@@ -21,7 +22,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-_DEFAULT_DB_PATH = Path(__file__).parent.parent.parent / "billingwatch.db"
+_DEFAULT_DB_PATH = Path(os.environ.get("DB_PATH", "") or str(Path(__file__).parent.parent.parent / "billingwatch.db"))
 
 _CREATE_EVENTS_TABLE = """
 CREATE TABLE IF NOT EXISTS events (
