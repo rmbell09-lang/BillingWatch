@@ -1,59 +1,36 @@
-# render.yaml — BillingWatch deployment on Render (Docker mode)
-# https://render.com/docs/render-yaml-spec
-#
-# ⚠️  SQLITE NOTE: Render's free tier has ephemeral disk storage.
-#     Data will NOT persist across deploys/restarts.
-#     For persistence: add a Render Disk (/mo) and set DB_PATH to its mount path.
-#
-# DEPLOY:
-#   1. Push this file to repo root
-#   2. New Render Blueprint → connect repo
-#   3. Set secret env vars: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
-
 services:
   - type: web
     name: billingwatch
-    env: docker
+    env: python
     plan: free
     region: oregon
-
-    dockerfilePath: ./Dockerfile
-
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --workers 1
     healthCheckPath: /health
-
     envVars:
+      - key: PYTHON_VERSION
+        value: '3.12.0'
       - key: STRIPE_SECRET_KEY
         sync: false
-
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
-
       - key: DB_PATH
         value: /tmp/billingwatch.db
-
       - key: SMTP_HOST
-        value: 
-
+        value: ''
       - key: SMTP_PORT
-        value: 587
-
+        value: '587'
       - key: SMTP_USER
-        value: 
-
+        value: ''
       - key: SMTP_PASS
         sync: false
-
       - key: SMTP_USE_TLS
-        value: true
-
+        value: 'true'
       - key: ALERT_EMAIL_FROM
-        value: 
-
+        value: ''
       - key: ALERT_EMAIL_TO
-        value: 
-
+        value: ''
       - key: ALERT_WEBHOOK_URL
-        value: 
-
+        value: ''
       - key: ALERT_WEBHOOK_SECRET
         sync: false
