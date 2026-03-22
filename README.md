@@ -255,3 +255,28 @@ See [`docs/production-setup.md`](docs/production-setup.md) for the full guide co
 ## License
 
 Private — Ray's project. Not open source.
+
+---
+
+## Roadmap
+
+BillingWatch is under active development. Here's what's coming:
+
+### v1.1 (In Progress)
+- **📧 SMTP Email Digest** — daily/weekly summary of anomaly activity, delivered to your inbox
+- **☁️ Render.com 1-Click Deploy** — `render.yaml` + deploy button for zero-config cloud hosting
+- **🔍 Webhook Event Explorer UI** — searchable, filterable event log with detector metadata
+
+### v1.2 (Planned)
+- **📊 Grafana Dashboard** — pre-built dashboard for anomaly trends and alert history
+- **🔔 Slack/Discord Alerts** — native integrations beyond email webhooks
+- **🧪 Stripe Test Mode Replay** — replay historical events against detectors without a live webhook stream
+
+### Future
+- Multi-account support (multiple Stripe accounts per instance)
+- Alert suppression rules (silence known-good patterns)
+- Custom detector SDK + plugin marketplace
+
+---
+
+*Want a feature? Open an issue or [drop a message](https://github.com/rmbell09-lang/BillingWatch/issues).*
