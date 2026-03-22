@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BillingWatch — Stripe Anomaly Detection for SaaS</title>
+  <meta name="description" content="Real-time anomaly detection for Stripe webhooks. Catch duplicate charges, payment failures, and silent lapses before your customers do." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0e1a;
+      --bg2: #111827;
+      --bg3: #1a2235;
+      --border: #1e2d45;
+      --text: #e8edf5;
+      --muted: #8899bb;
+      --accent: #3b82f6;
+      --accent2: #60a5fa;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --purple: #a855f7;
+      --radius: 10px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 60px;
+      background: rgba(10,14,26,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .nav-logo span { color: var(--accent); }
+    .nav-cta {
+      background: var(--accent); color: #fff; border: none; border-radius: 6px;
+      padding: 8px 18px; font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      text-decoration: none;
+    }
+    .nav-cta:hover { background: var(--accent2); }
+
+    /* SECTIONS */
+    section { padding: 80px 5%; max-width: 1100px; margin: 0 auto; }
+    section.full { max-width: none; padding: 80px 5%; }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 100px 5% 80px;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: var(--accent2);
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
+    }
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800; line-height: 1.18;
+      color: var(--text); margin-bottom: 22px;
+    }
+    h1 em { font-style: normal; color: var(--accent2); }
+    .hero-sub {
+      font-size: 1.15rem; color: var(--muted);
+      max-width: 640px; margin: 0 auto 36px;
+    }
+    .hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      padding: 14px 28px; font-size: 1rem; font-weight: 700; cursor: pointer;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: var(--accent2); }
+    .btn-secondary {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 28px; font-size: 1rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
+    .hero-quote {
+      margin-top: 40px; padding: 20px 28px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius); font-style: italic;
+      color: var(--muted); font-size: 0.95rem; text-align: left;
+    }
+
+    /* SECTION HEADINGS */
+    h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 14px; }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--accent); margin-bottom: 10px;
+    }
+    .section-sub { color: var(--muted); font-size: 1.05rem; margin-bottom: 48px; max-width: 620px; }
+
+    /* PROBLEM */
+    .problems { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 40px; }
+    .problem-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+    }
+    .problem-card .icon { font-size: 1.6rem; margin-bottom: 12px; }
+    .problem-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+    .problem-card p { font-size: 0.875rem; color: var(--muted); }
+
+    /* DETECTORS TABLE */
+    .detectors-wrap {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-top: 40px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--bg3); }
+    th { padding: 14px 20px; text-align: left; font-size: 0.8rem; text-transform: uppercase;
+         letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+    td { padding: 16px 20px; border-top: 1px solid var(--border); font-size: 0.9rem; }
+    td:first-child { font-weight: 600; color: var(--text); }
+    td:last-child { color: var(--muted); }
+    tr:hover td { background: rgba(59,130,246,0.04); }
+    .detector-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--green);
+      margin-right: 10px; vertical-align: middle;
+    }
+
+    /* HOW IT WORKS */
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-top: 40px; }
+    .step {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px;
+      position: relative;
+    }
+    .step-num {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3);
+      color: var(--accent2); font-weight: 700; font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .step p { font-size: 0.875rem; color: var(--muted); }
+
+    /* PRICING */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 20px; margin-top: 40px;
+    }
+    .pricing-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px;
+      display: flex; flex-direction: column;
+    }
+    .pricing-card.featured {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, var(--bg2) 100%);
+    }
+    .pricing-card .popular-badge {
+      background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 3px 10px; border-radius: 20px; margin-bottom: 12px;
+      align-self: flex-start;
+    }
+    .plan-name { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .plan-price { font-size: 2.2rem; font-weight: 800; line-height: 1; margin: 10px 0 4px; }
+    .plan-price span { font-size: 0.95rem; font-weight: 400; color: var(--muted); }
+    .plan-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 20px; }
+    .plan-features { list-style: none; flex: 1; margin-bottom: 24px; }
+    .plan-features li {
+      font-size: 0.875rem; padding: 5px 0; color: var(--muted);
+      display: flex; align-items: baseline; gap: 8px;
+    }
+    .plan-features li::before { content: "✓"; color: var(--green); font-weight: 700; flex-shrink: 0; }
+    .plan-cta {
+      display: block; text-align: center; padding: 12px;
+      border-radius: 7px; font-weight: 700; font-size: 0.9rem;
+      text-decoration: none; cursor: pointer;
+    }
+    .plan-cta-outline {
+      border: 1px solid var(--border); color: var(--text); background: transparent;
+    }
+    .plan-cta-outline:hover { border-color: var(--accent); color: var(--accent2); }
+    .plan-cta-filled { background: var(--accent); color: #fff; border: none; }
+    .plan-cta-filled:hover { background: var(--accent2); }
+    .beta-note {
+      margin-top: 28px; padding: 16px 20px;
+      background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
+      border-radius: var(--radius); font-size: 0.875rem; color: var(--yellow);
+      text-align: center;
+    }
+
+    /* VS TABLE */
+    .vs-table-wrap {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-top: 40px;
+    }
+    .vs-table td { font-size: 0.875rem; }
+    .vs-table td:first-child { color: var(--muted); }
+    .vs-table .win { color: var(--green); font-weight: 600; }
+
+    /* FAQ */
+    .faq-list { margin-top: 36px; display: grid; gap: 16px; }
+    .faq-item {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+    }
+    .faq-item h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+    .faq-item p { font-size: 0.875rem; color: var(--muted); }
+
+    /* FINAL CTA */
+    .final-cta {
+      text-align: center;
+      padding: 90px 5%;
+      background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, transparent 100%);
+      border-top: 1px solid var(--border);
+    }
+    .final-cta h2 { max-width: 600px; margin: 0 auto 16px; }
+    .final-cta p { color: var(--muted); margin-bottom: 32px; }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 30px 5%;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 0.82rem;
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 60px 5% 50px; }
+      h1 { font-size: 1.8rem; }
+      .pricing-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Billing<span>Watch</span></a>
+  <a href="#pricing" class="nav-cta">Get Early Access</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">🔔 Now in Beta</div>
+  <h1>Your Stripe billing is on autopilot.<br/><em>BillingWatch makes sure it doesn't crash.</em></h1>
+  <p class="hero-sub">Real-time anomaly detection for Stripe webhooks. Catch duplicate charges, payment failures, and silent lapses before your customers do.</p>
+  <div class="hero-ctas">
+    <a href="#pricing" class="btn-primary">Get Early Access — Free</a>
+    <a href="#how-it-works" class="btn-secondary">See how it works ↓</a>
+  </div>
+  <div class="hero-quote">
+    "We caught a duplicate charge bug that was hitting 3% of upgrades — within 10 minutes of it starting." <strong>— Beta user</strong>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section>
+  <div class="section-label">The Problem</div>
+  <h2>Billing bugs are invisible until they're expensive</h2>
+  <p class="section-sub">You're probably already monitoring uptime and error rates. But nobody's watching your billing stream.</p>
+  <div class="problems">
+    <div class="problem-card">
+      <div class="icon">💸</div>
+      <h3>Silent dunning failures</h3>
+      <p>Failed dunning flows silently let subscriptions lapse — you find out at month-end when MRR is already down.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🔁</div>
+      <h3>Negative invoice bugs</h3>
+      <p>A promo code bug creates negative invoices. Stripe processes them without question. You never get notified.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">💳</div>
+      <h3>Card testing fraud</h3>
+      <p>Card fraud spikes your dispute rate overnight. You get notified after the damage — and the chargebacks — are done.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🐢</div>
+      <h3>Webhook stalls</h3>
+      <p>Event processing stalls, events pile up, your app is blind — and customers are confused about their subscription state.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DETECTORS -->
+<section>
+  <div class="section-label">What We Detect</div>
+  <h2>7 detectors. Zero blind spots.</h2>
+  <p class="section-sub">Every event in your Stripe webhook stream runs through all 7 detectors in real time.</p>
+  <div class="detectors-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>What BillingWatch watches</th>
+          <th>What it means for you</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="detector-dot"></span>Charge failure spike (&gt;15%)</td>
+          <td>Dunning failure or payment method issue — catch it before churn</td>
+        </tr>
+        <tr>
+          <td><span class="detector-dot"></span>Duplicate charge</td>
+          <td>Same customer charged twice — know before they dispute</td>
+        </tr>
+        <tr>
+          <td><span class="detector-dot"></span>Fraud spike</td>
+          <td>Card testing or stolen cards — stop the bleeding immediately</td>
+        </tr>
+        <tr>
+          <td><span class="detector-dot"></span>Negative invoice</td>
+          <td>Broken promo stacking — your revenue numbers just got weird</td>
+        </tr>
+        <tr>
+          <td><span class="detector-dot"></span>Revenue drop (&gt;15%)</td>
+          <td>Something's wrong upstream — find out in minutes, not days</td>
+        </tr>
+        <tr>
+          <td><span class="detector-dot"></span>Silent subscription lapse</td>
+          <td>Active sub, no payment — invisible churn accumulating</td>
+        </tr>
+        <tr>
+          <td><span class="detector-dot"></span>Webhook lag (&gt;10 min)</td>
+          <td>Your event pipeline is backed up — your app is flying blind</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-label">Setup</div>
+  <h2>Drop in. Connect Stripe. Get alerts.</h2>
+  <p class="section-sub">No code changes. No SDK to install. No dashboard to babysit.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Point your Stripe webhook</h3>
+      <p>Add the BillingWatch endpoint to your Stripe dashboard. One URL, one minute.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Events run through all 7 detectors</h3>
+      <p>BillingWatch validates every event in real time — charge failures, fraud spikes, webhook lag, and more.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Get alerted immediately</h3>
+      <p>When something looks wrong, you hear about it via email, webhook, or Slack — before your customers do.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-label">Pricing</div>
+  <h2>Simple pricing. Pays for itself with one catch.</h2>
+  <p class="section-sub">One caught duplicate charge dispute saves more than the monthly fee. Scale as your Stripe volume grows.</p>
+  <div class="pricing-grid">
+
+    <div class="pricing-card">
+      <div class="plan-name">Hobby</div>
+      <div class="plan-price">$0<span>/mo</span></div>
+      <div class="plan-desc">Get started, prove value</div>
+      <ul class="plan-features">
+        <li>500 events/month</li>
+        <li>All 7 detectors</li>
+        <li>Email alerts</li>
+        <li>1 Stripe account</li>
+      </ul>
+      <a href="#" class="plan-cta plan-cta-outline">Start Free</a>
+    </div>
+
+    <div class="pricing-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">$29<span>/mo</span></div>
+      <div class="plan-desc">For &lt;$10K MRR SaaS</div>
+      <ul class="plan-features">
+        <li>10,000 events/month</li>
+        <li>All 7 detectors</li>
+        <li>Email + webhook alerts</li>
+        <li>1 Stripe account</li>
+        <li>30-day event history</li>
+      </ul>
+      <a href="#" class="plan-cta plan-cta-outline">Get Starter</a>
+    </div>
+
+    <div class="pricing-card featured">
+      <div class="popular-badge">Most Popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$99<span>/mo</span></div>
+      <div class="plan-desc">For $10K–$100K MRR SaaS</div>
+      <ul class="plan-features">
+        <li>100,000 events/month</li>
+        <li>All 7 detectors + custom thresholds</li>
+        <li>Email + webhook + Slack</li>
+        <li>3 Stripe accounts</li>
+        <li>90-day event history</li>
+        <li>Monthly anomaly digest</li>
+      </ul>
+      <a href="#" class="plan-cta plan-cta-filled">Get Pro</a>
+    </div>
+
+    <div class="pricing-card">
+      <div class="plan-name">Scale</div>
+      <div class="plan-price">$299<span>/mo</span></div>
+      <div class="plan-desc">For $100K+ MRR or multi-product</div>
+      <ul class="plan-features">
+        <li>Unlimited events</li>
+        <li>Custom detector rules</li>
+        <li>Unlimited Stripe accounts</li>
+        <li>1-year event history</li>
+        <li>API access</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="#" class="plan-cta plan-cta-outline">Get Scale</a>
+    </div>
+
+  </div>
+  <div class="beta-note">
+    🎉 <strong>Beta pricing:</strong> First 20 customers lock in Starter at $19/mo or Pro at $69/mo — for life.
+  </div>
+</section>
+
+<!-- VS ALTERNATIVES -->
+<section>
+  <div class="section-label">Why BillingWatch</div>
+  <h2>Built for what Stripe won't tell you</h2>
+  <p class="section-sub">Radar catches fraud at authorization. Datadog catches infra. BillingWatch catches billing pattern anomalies — the stuff nobody else watches.</p>
+  <div class="vs-table-wrap">
+    <table class="vs-table">
+      <thead>
+        <tr>
+          <th>Alternative</th>
+          <th>Why BillingWatch wins</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>DIY webhook monitoring</td>
+          <td class="win">Takes weeks to build, needs maintenance. We're already built.</td>
+        </tr>
+        <tr>
+          <td>Stripe Radar</td>
+          <td class="win">Fraud only — no operational anomalies or billing pattern detection.</td>
+        </tr>
+        <tr>
+          <td>Datadog / Grafana</td>
+          <td class="win">Requires instrumentation, expensive, and overkill for billing monitoring.</td>
+        </tr>
+        <tr>
+          <td>Watching the Stripe dashboard</td>
+          <td class="win">Reactive. We're proactive — we come to you.</td>
+        </tr>
+        <tr>
+          <td>Nothing</td>
+          <td class="win">Most common approach. Also most expensive when something breaks.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="section-label">FAQ</div>
+  <h2>Common questions</h2>
+  <div class="faq-list">
+    <div class="faq-item">
+      <h3>Do I need to change my Stripe setup?</h3>
+      <p>Just add a webhook endpoint in the Stripe dashboard. That's it — no code changes, no SDK to install.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What if I already use Stripe Radar?</h3>
+      <p>Radar catches fraud at the authorization level. BillingWatch catches anomalies in your billing <em>patterns</em> — duplicate charges, dunning failures, webhook lag — stuff Radar doesn't see.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Is my Stripe data safe?</h3>
+      <p>We only receive webhook event payloads — the same data Stripe already sends to any endpoint you configure. We never store card numbers or customer PII beyond what's in the event.</p>
+    </div>
+    <div class="faq-item">
+      <h3>What if I want a custom detector?</h3>
+      <p>Pro and Scale plans support custom detector rules. Tell us what billing edge case keeps you up at night — we'll build it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<div class="final-cta">
+  <div class="section-label">Get Started</div>
+  <h2>Stop finding out about billing bugs from your customers.</h2>
+  <p>BillingWatch watches your Stripe stream 24/7 so you don't have to.</p>
+  <div class="hero-ctas">
+    <a href="#pricing" class="btn-primary">Start Free — No Credit Card</a>
+    <a href="#how-it-works" class="btn-secondary">See how it works</a>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2026 BillingWatch. The billing watchdog for Stripe-powered SaaS.</p>
+</footer>
+
+</body>
+</html>
