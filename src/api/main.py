@@ -9,7 +9,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from .routes import webhooks, anomalies, metrics, demo, dashboard, dashboard_ui, beta, onboarding, config, export, tenants
+from .routes import webhooks, anomalies, metrics, demo, dashboard, dashboard_ui, beta, onboarding, config, export, tenants, digest
 
 
 @asynccontextmanager
@@ -51,6 +51,7 @@ def create_app() -> FastAPI:
     app.include_router(config.router)
     app.include_router(export.router)
     app.include_router(tenants.router)
+    app.include_router(digest.router)
 
     _start_time = _time.time()
 
