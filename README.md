@@ -252,6 +252,14 @@ See [`docs/production-setup.md`](docs/production-setup.md) for the full guide co
 
 ---
 
+## 🔗 Related Tools
+
+| Tool | Description |
+|------|-------------|
+| [TradeSight](https://github.com/rmbell09-lang/tradesight) | AI-driven Python paper trading system — strategy tournaments + live Alpaca integration |
+
+---
+
 ## License
 
 Private — Ray's project. Not open source.
