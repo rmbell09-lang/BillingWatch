@@ -246,6 +246,16 @@ BillingWatch/
 
 ---
 
+
+
+---
+
+## 🛠️ More Dev Tools
+
+Built by the same maker — if you're interested in algorithmic trading:
+
+**[TradeSight — AI Paper Trading Strategy Lab →](https://qcautonomous.gumroad.com/l/tradesight)** — Python trading bot with overnight strategy tournaments, RSI confluence, and Alpaca integration.
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
