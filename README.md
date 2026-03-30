@@ -6,6 +6,7 @@
 [![Tests: Passing](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
 [![Self-Hosted](https://img.shields.io/badge/self--hosted-yes-blueviolet.svg)]()
 [![Stripe](https://img.shields.io/badge/stripe-webhook--powered-635bff.svg)](https://stripe.com/)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg)](https://hub.docker.com/)
 
 **Catch billing bugs, dunning failures, and fraud before they hit your churn metrics — entirely on your own machine.**
 
@@ -35,6 +36,21 @@ BillingWatch listens to your Stripe webhook stream and runs 7 real-time anomaly 
 | `webhook_lag` | Events arriving > 10 min late — Stripe delivery degradation | 🟢 Low |
 
 When a detector fires, BillingWatch sends alerts via email and/or outbound webhook.
+
+---
+
+## 🆚 Why Not Just Use [Datadog / Baremetrics / Stripe Radar]?
+
+| | BillingWatch | Datadog | Baremetrics | Stripe Radar |
+|---|---|---|---|---|
+| **Cost** | Free (self-hosted) | 5+/mo | 29+/mo | Built-in (limited) |
+| **Your data leaves your server?** | ❌ Never | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Custom anomaly logic** | ✅ Full control | Partial | ❌ | ❌ |
+| **Stripe-specific detectors** | ✅ 7 built-in | ❌ General | ❌ Metrics only | ❌ Fraud only |
+| **Self-hostable** | ✅ Yes | ❌ | ❌ | ❌ |
+| **Alert destinations** | Email + webhook | Many | Email | Dashboard only |
+
+BillingWatch is for makers who want **billing QA** (not analytics) with zero SaaS lock-in.
 
 ---
 
