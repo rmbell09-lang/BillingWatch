@@ -266,6 +266,25 @@ BillingWatch/
 
 ---
 
+## 🔗 Related Projects & Alternatives
+
+BillingWatch fills the gap between expensive SaaS platforms and doing nothing:
+
+| Tool | Type | Cost | Why BillingWatch Instead |
+|---|---|---|---|
+| [Datadog](https://www.datadoghq.com/) | Full observability | $5+/mo | General-purpose APM, no Stripe-specific detectors |
+| [Baremetrics](https://baremetrics.com/) | SaaS analytics | $29+/mo | Analytics dashboards, not real-time anomaly alerts |
+| [Stripe Radar](https://stripe.com/radar) | Fraud detection | Built-in | Card fraud only — no dunning failures, duplicate charges, or webhook lag |
+| [Sentry](https://sentry.io/) | Error monitoring | $26+/mo | Code errors, not billing events |
+| [ChartMogul](https://chartmogul.com/) | Revenue analytics | $100+/mo | Historical charts, not real-time detection |
+| [Lago](https://github.com/getlago/lago) | Open-source billing | Self-hosted | Full billing system — BillingWatch monitors Stripe, not replaces it |
+
+BillingWatch is **free, self-hosted, and purpose-built for Stripe billing QA**. One webhook endpoint. Seven detectors. Zero SaaS fees.
+
+> **Also useful for:** stripe monitoring · stripe webhook monitoring · billing anomaly detection · SaaS billing monitoring · self-hosted stripe monitor · payment failure alerts · subscription billing QA · chargeback detection · dunning failure detection · webhook observability · fastapi stripe webhooks
+
+---
+
 ## 🛠️ More Dev Tools
 
 Built by the same maker — if you're interested in algorithmic trading:
