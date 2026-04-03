@@ -7,6 +7,7 @@
 [![Self-Hosted](https://img.shields.io/badge/self--hosted-yes-blueviolet.svg)]()
 [![Stripe](https://img.shields.io/badge/stripe-webhook--powered-635bff.svg)](https://stripe.com/)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg)](https://hub.docker.com/)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/rmbell09-lang/BillingWatch&referral=rmbell09-lang)
 
 **Catch billing bugs, dunning failures, and fraud before they hit your churn metrics — entirely on your own machine.**
 
@@ -55,6 +56,13 @@ BillingWatch is for makers who want **billing QA** (not analytics) with zero Saa
 ---
 
 ## 🚀 Quick Start
+
+### ⚡ One-Click Deploy on Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/rmbell09-lang/BillingWatch&referral=rmbell09-lang)
+
+No local setup required. Railway will prompt for your `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` on deploy.
+
 
 ### Requirements
 - Python 3.9+

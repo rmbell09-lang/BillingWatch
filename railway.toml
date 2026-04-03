@@ -1,0 +1,36 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[[services]]
+name = "billingwatch"
+
+[[services.variables]]
+name = "STRIPE_SECRET_KEY"
+description = "Your Stripe secret key (sk_live_... or sk_test_...)"
+required = true
+
+[[services.variables]]
+name = "STRIPE_WEBHOOK_SECRET"
+description = "Your Stripe webhook signing secret (whsec_...)"
+required = true
+
+[[services.variables]]
+name = "DB_PATH"
+defaultValue = "/tmp/billingwatch.db"
+
+[[services.variables]]
+name = "ALERT_EMAIL_TO"
+description = "Email address to send alerts to"
+required = false
+
+[[services.variables]]
+name = "ALERT_WEBHOOK_URL"
+description = "Webhook URL for alert delivery (Slack, Discord, etc.)"
+required = false
