@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BillingWatch v1.0: Self-Hosted Stripe Anomaly Detection — BillingWatch</title>
+  <meta name="description" content="BillingWatch v1.0 is live — open-source, self-hosted Stripe webhook monitor with 7 anomaly detectors, multi-tenant support, and zero ongoing cost.">
+  <link rel="alternate" type="application/atom+xml" title="BillingWatch Blog" href="../feed.xml">
+  <style>
+    body { background: #0a0e1a; color: #e8edf5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; line-height: 1.7; }
+    nav { background: #111827; border-bottom: 1px solid #1e2d45; padding: 14px 0; }
+    nav .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 24px; }
+    nav a { color: #60a5fa; text-decoration: none; font-size: 0.9rem; }
+    nav .brand { font-weight: 700; font-size: 1.1rem; color: #e8edf5; }
+    .container { max-width: 860px; margin: 0 auto; padding: 48px 20px; }
+    .back { display: inline-block; color: #60a5fa; text-decoration: none; font-size: 0.9rem; margin-bottom: 32px; }
+    .back:hover { text-decoration: underline; }
+    .post-meta { color: #8899bb; font-size: 0.9rem; margin-bottom: 32px; }
+    .tag { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-right: 6px; }
+    h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin: 48px 0 16px; color: #60a5fa; border-left: 4px solid #3b82f6; padding-left: 16px; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 24px 0 10px; color: #c9d7f0; }
+    p { margin-bottom: 16px; color: #c9d7f0; }
+    ul { margin: 0 0 16px 24px; color: #c9d7f0; }
+    ul li { margin-bottom: 6px; }
+    code { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.88em; }
+    pre { background: #111827; border: 1px solid #1e2d45; border-radius: 8px; padding: 20px; overflow-x: auto; margin: 20px 0; }
+    pre code { background: none; border: none; padding: 0; color: #60a5fa; }
+    .highlight-box { background: #111827; border: 1px solid #1e2d45; border-left: 4px solid #22c55e; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .highlight-box strong { color: #22c55e; }
+    .detector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+    .detector-item { background: #111827; border: 1px solid #1e2d45; border-radius: 8px; padding: 14px; }
+    .detector-item .name { color: #60a5fa; font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+    .detector-item .desc { color: #8899bb; font-size: 0.85rem; }
+    .cta { background: #111827; border: 1px solid #3b82f6; border-radius: 12px; padding: 32px; margin: 48px 0 0; text-align: center; }
+    .cta h2 { border: none; padding: 0; color: #e8edf5; font-size: 1.4rem; }
+    .cta p { color: #8899bb; }
+    .cta a { display: inline-block; background: #3b82f6; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px; }
+    .cta a:hover { background: #2563eb; }
+    @media (max-width: 600px) { .detector-grid { grid-template-columns: 1fr; } h1 { font-size: 1.7rem; } }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <span class="brand">🔍 BillingWatch</span>
+    <a href="../index.html">Home</a>
+    <a href="index.html">Blog</a>
+    <a href="https://github.com/rmbell09-lang/BillingWatch">GitHub</a>
+  </div>
+</nav>
+<div class="container">
+  <a class="back" href="index.html">← Back to Blog</a>
+
+  <h1>BillingWatch v1.0: Self-Hosted Stripe Anomaly Detection</h1>
+  <div class="post-meta">
+    📅 April 3, 2026 · ⏱ 5 min read
+    <br><br>
+    <span class="tag">launch</span>
+    <span class="tag">stripe</span>
+    <span class="tag">open-source</span>
+    <span class="tag">self-hosted</span>
+  </div>
+
+  <p>BillingWatch v1.0 is out. It's a self-hosted Stripe webhook monitor that catches billing anomalies before they become customer complaints, chargebacks, or silent revenue leaks.</p>
+
+  <p>If your SaaS runs on Stripe, weird things happen constantly: duplicate charges, payment failures that don't retry, subscriptions that quietly lapse, events that arrive out of order. Most of the time you find out from a customer or a panicked Slack message — not from your own monitoring. BillingWatch fixes that.</p>
+
+  <h2>The problem it solves</h2>
+
+  <p>Stripe sends webhooks for everything: payments, subscriptions, refunds, disputes. The problem is that Stripe itself doesn't tell you when something looks wrong — it just fires the event. Catching anomalies requires you to build the logic to compare events over time, track state, detect patterns.</p>
+
+  <p>Most teams don't build that. They check Stripe's dashboard manually, write one-off scripts, or get alerted by customers. BillingWatch builds that logic once and runs it for you, locally, on your own infrastructure.</p>
+
+  <h2>7 detectors, zero ongoing cost</h2>
+
+  <p>BillingWatch ships with seven anomaly detectors out of the box:</p>
+
+  <div class="detector-grid">
+    <div class="detector-item">
+      <div class="name">Duplicate charge detector</div>
+      <div class="desc">Flags charges for the same customer within a configurable time window</div>
+    </div>
+    <div class="detector-item">
+      <div class="name">Payment failure spike</div>
+      <div class="desc">Alerts when failure rate exceeds your baseline within a rolling period</div>
+    </div>
+    <div class="detector-item">
+      <div class="name">Subscription lapse monitor</div>
+      <div class="desc">Catches subscriptions that cancel without a corresponding customer action</div>
+    </div>
+    <div class="detector-item">
+      <div class="name">Out-of-order event detector</div>
+      <div class="desc">Detects webhook delivery ordering issues that can corrupt subscription state</div>
+    </div>
+    <div class="detector-item">
+      <div class="name">Revenue drop alert</div>
+      <div class="desc">Compares MRR snapshots across periods and flags drops beyond threshold</div>
+    </div>
+    <div class="detector-item">
+      <div class="name">Refund anomaly detector</div>
+      <div class="desc">Flags unusual refund volumes, partial refund patterns, or refund spikes</div>
+    </div>
+    <div class="detector-item">
+      <div class="name">Invoice discrepancy check</div>
+      <div class="desc">Catches invoices where line items don't match the subscribed plan price</div>
+    </div>
+  </div>
+
+  <p>Each detector is configurable per tenant. The entire system runs on SQLite + FastAPI — no external database, no cloud dependency, no per-event pricing.</p>
+
+  <h2>Multi-tenant from day one</h2>
+
+  <p>BillingWatch is built for agencies and developers who run Stripe for multiple clients. Each tenant gets isolated event storage, separate detector thresholds, and independent alert configuration. One deployment handles all of them.</p>
+
+  <div class="highlight-box">
+    <strong>Architecture:</strong> FastAPI backend · SQLite storage · Webhook signature verification · REST API for tenant management · JSON digest reports · Docker + Render deploy-ready
+  </div>
+
+  <h2>Getting started</h2>
+
+  <p>Clone the repo and start receiving webhooks in under 5 minutes:</p>
+
+  <pre><code>git clone https://github.com/rmbell09-lang/BillingWatch
+cd BillingWatch
+cp .env.example .env  # add STRIPE_WEBHOOK_SECRET
+docker compose up</code></pre>
+
+  <p>Then point a Stripe webhook endpoint at <code>https://your-host/webhooks/stripe</code> and BillingWatch starts monitoring. Use the REST API to configure tenants, query anomalies, and set alert thresholds.</p>
+
+  <p>Full setup docs are in the repo: <a href="https://github.com/rmbell09-lang/BillingWatch" style="color: #60a5fa;">github.com/rmbell09-lang/BillingWatch</a></p>
+
+  <h2>What's next</h2>
+
+  <p>The v1.0 focus was correctness and reliability — getting the detectors right and keeping the deployment simple. On the roadmap:</p>
+
+  <ul>
+    <li>Email and Slack digest delivery (webhook → alert → you)</li>
+    <li>Dashboard UI for anomaly browsing and false positive tuning</li>
+    <li>Playwright integration test suite against Stripe's test mode</li>
+    <li>Additional detectors: trial conversion gaps, proration errors</li>
+  </ul>
+
+  <p>If you're running Stripe and want a billing safety net that you control, BillingWatch is worth 5 minutes to set up.</p>
+
+  <div class="cta">
+    <h2>Try BillingWatch</h2>
+    <p>Open-source, self-hosted, MIT licensed. No account required.</p>
+    <a href="https://github.com/rmbell09-lang/BillingWatch">View on GitHub →</a>
+  </div>
+</div>
+</body>
+</html>
