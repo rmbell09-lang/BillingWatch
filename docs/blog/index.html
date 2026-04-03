@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BillingWatch Blog — Stripe Billing & SaaS Revenue Operations</title>
+  <meta name="description" content="Practical posts on Stripe billing bugs, webhook anomaly detection, and SaaS revenue operations.">
+  <link rel="alternate" type="application/atom+xml" title="BillingWatch Blog" href="../feed.xml">
+  <style>
+    body { background: #0a0e1a; color: #e8edf5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; }
+    nav { background: #111827; border-bottom: 1px solid #1e2d45; padding: 14px 0; }
+    nav .nav-inner { max-width: 800px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 24px; }
+    nav a { color: #60a5fa; text-decoration: none; font-size: 0.9rem; }
+    nav .brand { font-weight: 700; font-size: 1.1rem; color: #e8edf5; }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .subtitle { color: #8899bb; margin-bottom: 40px; }
+    .post-card { background: #111827; border: 1px solid #1e2d45; border-radius: 12px; padding: 24px; margin-bottom: 20px; transition: border-color 0.2s; }
+    .post-card:hover { border-color: #60a5fa; }
+    .post-card h2 { font-size: 1.3rem; margin: 0 0 8px; }
+    .post-card h2 a { color: #e8edf5; text-decoration: none; }
+    .post-card h2 a:hover { color: #60a5fa; }
+    .post-meta { color: #8899bb; font-size: 0.85rem; margin-bottom: 12px; }
+    .post-excerpt { color: #c9d7f0; line-height: 1.7; }
+    .tag { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px; }
+    .feed-link { display: inline-flex; align-items: center; gap: 8px; background: #111827; border: 1px solid #1e2d45; color: #8899bb; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; margin-bottom: 32px; }
+    .feed-link:hover { border-color: #60a5fa; color: #60a5fa; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <span class="brand">🔍 BillingWatch</span>
+    <a href="../index.html">Home</a>
+    <a href="index.html">Blog</a>
+    <a href="https://github.com/rmbell09-lang/BillingWatch">GitHub</a>
+  </div>
+</nav>
+<div class="container">
+  <h1>BillingWatch Blog</h1>
+  <p class="subtitle">Stripe billing bugs, webhook anomaly detection, and SaaS revenue operations.</p>
+
+  <a href="../feed.xml" class="feed-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/></svg>
+    Atom/RSS Feed
+  </a>
+
+  <div class="post-card">
+    <h2><a href="stripe-billing-bugs.html">Stripe Billing Bugs That Cost SaaS Companies Thousands</a></h2>
+    <div class="post-meta">📅 April 2, 2026 · ⏱ 7 min read</div>
+    <div style="margin-bottom: 12px;">
+      <span class="tag">stripe</span>
+      <span class="tag">saas</span>
+      <span class="tag">billing</span>
+      <span class="tag">open-source</span>
+    </div>
+    <p class="post-excerpt">
+      Five billing bugs that show up repeatedly in Stripe-powered SaaS — phantom subscriptions, price drift,
+      duplicate charges, failed payment cascades, and usage metering gaps. What they cost and how to catch them automatically.
+    </p>
+  </div>
+</div>
+</body>
+</html>

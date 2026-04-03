@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>BillingWatch Blog — Stripe Billing &amp; SaaS Revenue Operations</title>
+  <subtitle>Practical posts on Stripe billing bugs, webhook anomaly detection, and SaaS revenue operations.</subtitle>
+  <link href="https://rmbell09-lang.github.io/BillingWatch/feed.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://rmbell09-lang.github.io/BillingWatch/blog/" rel="alternate" type="text/html"/>
+  <id>https://rmbell09-lang.github.io/BillingWatch/</id>
+  <updated>2026-04-02T23:00:00Z</updated>
+  <author>
+    <name>BillingWatch Project</name>
+    <uri>https://github.com/rmbell09-lang/BillingWatch</uri>
+  </author>
+  <rights>MIT License — open source</rights>
+
+  <entry>
+    <title>Stripe Billing Bugs That Cost SaaS Companies Thousands</title>
+    <link href="https://rmbell09-lang.github.io/BillingWatch/blog/stripe-billing-bugs.html" rel="alternate" type="text/html"/>
+    <id>https://rmbell09-lang.github.io/BillingWatch/blog/stripe-billing-bugs.html</id>
+    <published>2026-04-02T23:00:00Z</published>
+    <updated>2026-04-02T23:00:00Z</updated>
+    <category term="stripe" label="Stripe"/>
+    <category term="saas" label="SaaS"/>
+    <category term="billing" label="Billing"/>
+    <category term="open-source" label="Open Source"/>
+    <summary type="text">
+      Five billing bugs that show up repeatedly in Stripe-powered SaaS companies — phantom subscriptions,
+      price drift, duplicate charges, failed payment cascades, and usage metering gaps. What they cost in
+      real dollars and how to catch them automatically with BillingWatch.
+    </summary>
+    <content type="html">
+      &lt;p&gt;Billing bugs are the silent revenue killers in SaaS. They&apos;re often invisible — no alarms go off, no dashboards light up red — but their impact accumulates fast: lost revenue, chargebacks, frustrated customers.&lt;/p&gt;
+      &lt;p&gt;This post covers five billing bugs that show up repeatedly in Stripe-powered SaaS companies, why they happen, and how much they actually cost — plus how &lt;a href="https://rmbell09-lang.github.io/BillingWatch/"&gt;BillingWatch&lt;/a&gt; catches them automatically.&lt;/p&gt;
+      &lt;p&gt;&lt;a href="https://rmbell09-lang.github.io/BillingWatch/blog/stripe-billing-bugs.html"&gt;Read the full post →&lt;/a&gt;&lt;/p&gt;
+    </content>
+  </entry>
+
+</feed>

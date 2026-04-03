@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stripe Billing Bugs That Cost SaaS Companies Thousands — BillingWatch</title>
+  <meta name="description" content="Five common Stripe billing bugs — phantom subscriptions, price drift, duplicate charges, failed payment cascades, and usage metering gaps — and how to detect them automatically.">
+  <link rel="alternate" type="application/atom+xml" title="BillingWatch Blog" href="../feed.xml">
+  <style>
+    body { background: #0a0e1a; color: #e8edf5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; line-height: 1.7; }
+    nav { background: #111827; border-bottom: 1px solid #1e2d45; padding: 14px 0; }
+    nav .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 24px; }
+    nav a { color: #60a5fa; text-decoration: none; font-size: 0.9rem; }
+    nav .brand { font-weight: 700; font-size: 1.1rem; color: #e8edf5; }
+    .container { max-width: 860px; margin: 0 auto; padding: 48px 20px; }
+    .back { display: inline-block; color: #60a5fa; text-decoration: none; font-size: 0.9rem; margin-bottom: 32px; }
+    .back:hover { text-decoration: underline; }
+    .post-meta { color: #8899bb; font-size: 0.9rem; margin-bottom: 32px; }
+    .tag { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-right: 6px; }
+    h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin: 48px 0 16px; color: #60a5fa; border-left: 4px solid #3b82f6; padding-left: 16px; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 24px 0 10px; color: #c9d7f0; }
+    p { margin-bottom: 16px; color: #c9d7f0; }
+    ul { margin: 0 0 16px 24px; color: #c9d7f0; }
+    ul li { margin-bottom: 6px; }
+    code { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.88em; }
+    .impact-box { background: #111827; border: 1px solid #1e2d45; border-left: 4px solid #ef4444; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .impact-box strong { color: #ef4444; }
+    .cta { background: #111827; border: 1px solid #3b82f6; border-radius: 12px; padding: 32px; margin: 48px 0 0; text-align: center; }
+    .cta h2 { border: none; padding: 0; color: #e8edf5; font-size: 1.4rem; }
+    .cta p { color: #8899bb; }
+    .cta a { display: inline-block; background: #3b82f6; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px; }
+    .cta a:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <span class="brand">🔍 BillingWatch</span>
+    <a href="../index.html">Home</a>
+    <a href="index.html">Blog</a>
+    <a href="https://github.com/rmbell09-lang/BillingWatch">GitHub</a>
+  </div>
+</nav>
+<div class="container">
+  <a class="back" href="index.html">← Back to Blog</a>
+
+  <h1>Stripe Billing Bugs That Cost SaaS Companies Thousands</h1>
+  <div class="post-meta">
+    📅 April 2, 2026 · ⏱ 7 min read
+    <br><br>
+    <span class="tag">stripe</span>
+    <span class="tag">saas</span>
+    <span class="tag">billing</span>
+    <span class="tag">open-source</span>
+  </div>
+
+  <p>Billing bugs are the silent revenue killers in SaaS. They're often invisible — no alarms go off, no dashboards light up red — but their impact accumulates fast: lost revenue, chargebacks, frustrated customers, and a reputation that takes months to rebuild.</p>
+
+  <p>This post covers five billing bugs that show up repeatedly in Stripe-powered SaaS companies, why they happen, and how much they can actually cost you.</p>
+
+  <h2>Bug #1: Phantom Subscriptions</h2>
+
+  <h3>What is it?</h3>
+  <p>A phantom subscription occurs when Stripe incorrectly assigns an existing customer to a new plan or product — often without their knowledge or consent. The customer ends up being charged for something they never signed up for.</p>
+
+  <h3>How does it happen?</h3>
+  <ul>
+    <li>Incorrect use of <code>invoice_settings->default_payment_method</code></li>
+    <li>Misconfigured <code>product</code> and <code>price</code> settings during plan migrations</li>
+    <li>Inadequate validation when creating new plans or products</li>
+  </ul>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> A company with 100 customers accidentally assigns 20 to a $500/month premium plan during a migration. That's <strong>$10,000 in erroneous charges per month</strong> — and chargebacks if customers dispute it.
+  </div>
+
+  <h2>Bug #2: Price Drift on Plan Changes</h2>
+
+  <h3>What is it?</h3>
+  <p>Price drift occurs when Stripe charges a customer an outdated price after a plan change — either too much or too little. Both are bad: overcharging triggers disputes, undercharging erodes margins.</p>
+
+  <h3>How does it happen?</h3>
+  <ul>
+    <li>Inadequate use of <code>stripe_price</code> vs. <code>stripe_plan</code> (legacy) settings</li>
+    <li>Failure to propagate pricing metadata across plan transitions</li>
+    <li>Discount logic that doesn't account for plan upgrades correctly</li>
+  </ul>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> 50 customers on a plan with a 10% discount that wasn't applied correctly. Over a month: <strong>$2,500 in overcharges</strong> — enough to trigger a wave of disputes and refund requests.
+  </div>
+
+  <h2>Bug #3: Duplicate Charge Events</h2>
+
+  <h3>What is it?</h3>
+  <p>Duplicate charge events happen when Stripe generates multiple invoices or charges for the same billing period. Customers get billed twice — and they notice.</p>
+
+  <h3>How does it happen?</h3>
+  <ul>
+    <li>Incorrect configuration of <code>invoice_settings->tax_rates</code></li>
+    <li>Webhook handlers that aren't idempotent — processing the same event twice</li>
+    <li>Race conditions during subscription creation</li>
+  </ul>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> 500 customers, 10% receive a duplicate invoice. If average MRR per customer is $100: <strong>$5,000 in duplicate charges</strong> in a single month, plus the customer trust damage.
+  </div>
+
+  <h2>Bug #4: Failed Payment Cascade</h2>
+
+  <h3>What is it?</h3>
+  <p>A failed payment cascade triggers multiple charge attempts after an initial failure — hammering a customer's card repeatedly and burning the relationship before you even get a chance to recover the payment gracefully.</p>
+
+  <h3>How does it happen?</h3>
+  <ul>
+    <li>Misconfigured <code>invoice_settings->payment_failure_action</code></li>
+    <li>Custom retry logic layered on top of Stripe's built-in smart retries (double-retrying)</li>
+    <li>Missing exponential backoff in webhook retry handlers</li>
+  </ul>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> 20 customers with failed payments, each hit with 5+ charge attempts in 24 hours. Most cancel preemptively. At $200 ARR each: <strong>$4,000 in lost revenue</strong> — preventable with proper retry configuration.
+  </div>
+
+  <h2>Bug #5: Usage Metering Gaps</h2>
+
+  <h3>What is it?</h3>
+  <p>Usage metering gaps occur when Stripe's metered billing doesn't receive accurate usage records — either because reports are missed, sent with wrong timestamps, or aggregated incorrectly. Customers get billed for the wrong amount.</p>
+
+  <h3>How does it happen?</h3>
+  <ul>
+    <li>Usage records sent to incorrect <code>subscription_item</code> IDs</li>
+    <li>Metering events dropped silently when the usage reporter crashes</li>
+    <li>Incorrect <code>action</code> parameter (<code>set</code> vs. <code>increment</code>) causing data corruption</li>
+  </ul>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> 50 customers on a pay-per-GB model charged for double their actual usage. At $100 per unit overage: <strong>$5,000 in overcharges</strong> — plus the support cost when they all email you at once.
+  </div>
+
+  <h2>The Common Thread</h2>
+  <p>Every one of these bugs has two things in common: they're <strong>hard to spot manually</strong> (they live in webhook event streams and Stripe dashboard data), and they compound silently over time. By the time you notice them, the damage is done.</p>
+
+  <p>The fix is automation. You need something watching your Stripe webhook stream continuously — catching anomalies the moment they appear, not when a customer files a dispute.</p>
+
+  <div class="cta">
+    <h2>🔍 BillingWatch catches these automatically</h2>
+    <p>Open-source Stripe anomaly detector. Monitors webhooks for all five patterns above — and more. Self-hosted, no SaaS fees, runs on any server.</p>
+    <a href="https://github.com/rmbell09-lang/BillingWatch">View on GitHub →</a>
+  </div>
+</div>
+</body>
+</html>
