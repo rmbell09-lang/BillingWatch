@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Hosted Stripe Billing Monitor: Free Baremetrics Alternative — BillingWatch</title>
+  <meta name="description" content="BillingWatch is a free, open-source, self-hosted Stripe billing monitor. Detect billing anomalies, process webhooks, and ditch $99/mo SaaS fees. Deploy in minutes.">
+  <meta name="keywords" content="self-hosted Baremetrics alternative, open source Stripe anomaly detection, Stripe billing monitor, self-hosted billing monitoring, free ProfitWell alternative">
+  <link rel="alternate" type="application/atom+xml" title="BillingWatch Blog" href="../feed.xml">
+  <style>
+    body { background: #0a0e1a; color: #e8edf5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; line-height: 1.7; }
+    nav { background: #111827; border-bottom: 1px solid #1e2d45; padding: 14px 0; }
+    nav .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 24px; }
+    nav a { color: #60a5fa; text-decoration: none; font-size: 0.9rem; }
+    nav .brand { font-weight: 700; font-size: 1.1rem; color: #e8edf5; }
+    .container { max-width: 860px; margin: 0 auto; padding: 48px 20px; }
+    .back { display: inline-block; color: #60a5fa; text-decoration: none; font-size: 0.9rem; margin-bottom: 32px; }
+    .back:hover { text-decoration: underline; }
+    .post-meta { color: #8899bb; font-size: 0.9rem; margin-bottom: 32px; }
+    .tag { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-right: 6px; }
+    h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 40px; margin-bottom: 12px; color: #e8edf5; }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 28px; margin-bottom: 8px; color: #c9d7f0; }
+    p { color: #c9d7f0; margin-bottom: 20px; }
+    ul, ol { color: #c9d7f0; padding-left: 24px; margin-bottom: 20px; }
+    li { margin-bottom: 8px; }
+    code { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 2px 8px; border-radius: 4px; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.9em; }
+    pre { background: #111827; border: 1px solid #1e2d45; border-radius: 8px; padding: 20px; overflow-x: auto; margin-bottom: 24px; }
+    pre code { background: none; border: none; color: #e8edf5; padding: 0; }
+    .cta-box { background: #111827; border: 1px solid #1e2d45; border-left: 4px solid #60a5fa; border-radius: 8px; padding: 24px; margin: 32px 0; }
+    .cta-box h3 { margin-top: 0; color: #60a5fa; }
+    a { color: #60a5fa; }
+    a:hover { text-decoration: underline; }
+    strong { color: #e8edf5; }
+    .cost-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    .cost-table th { background: #111827; color: #8899bb; text-align: left; padding: 12px 16px; border-bottom: 1px solid #1e2d45; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .cost-table td { padding: 12px 16px; border-bottom: 1px solid #111827; color: #c9d7f0; }
+    .cost-table tr:nth-child(even) { background: #0d1220; }
+    .highlight { color: #34d399; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="../" class="brand">BillingWatch</a>
+      <a href="../blog/">Blog</a>
+      <a href="https://github.com/rmbell09-lang/billingwatch">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <a href="../blog/" class="back">&larr; Back to Blog</a>
+
+    <h1>Self-Hosted Stripe Billing Monitor: Stop Paying $99/mo for What You Can Run Free</h1>
+    <div class="post-meta">
+      <span class="tag">open-source</span>
+      <span class="tag">stripe</span>
+      <span class="tag">self-hosted</span>
+      April 3, 2026 &middot; 6 min read
+    </div>
+
+    <p>
+      Baremetrics starts at $99/month. ProfitWell (now Paddle) has been absorbing features while the pricing bloats.
+      For indie developers and small SaaS teams, this is a lot to pay just to know if your revenue is behaving normally.
+    </p>
+    <p>
+      <strong>BillingWatch</strong> does the core job for free. It is open-source, self-hosted, and runs on a $5/mo VPS.
+      You get Stripe webhook processing and anomaly detection without handing your billing data to a third party.
+    </p>
+
+    <h2>The Problem: SaaS Billing Tools Are Expensive</h2>
+    <p>
+      Here is what the market looks like if you want automated Stripe monitoring:
+    </p>
+
+    <table class="cost-table">
+      <thead>
+        <tr><th>Tool</th><th>Starting Price</th><th>Self-Hosted?</th><th>Open Source?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Baremetrics</td><td>$99/mo</td><td>No</td><td>No</td></tr>
+        <tr><td>ProfitWell / Paddle</td><td>Free tier then paid</td><td>No</td><td>No</td></tr>
+        <tr><td>ChartMogul</td><td>$100/mo</td><td>No</td><td>No</td></tr>
+        <tr><td><strong>BillingWatch</strong></td><td class="highlight">$0</td><td class="highlight">Yes</td><td class="highlight">Yes</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      If your monthly revenue is under $5k, paying $100/mo for billing analytics is a significant chunk of your MRR.
+      And all you really need to know is: <em>did something break, and did revenue drop unexpectedly?</em>
+    </p>
+
+    <h2>What BillingWatch Does</h2>
+    <p>BillingWatch is a Python application that:</p>
+    <ul>
+      <li>Receives <strong>Stripe webhooks</strong> and processes them in real-time</li>
+      <li>Runs <strong>anomaly detection</strong> on your payment stream &mdash; surfacing spikes, drops, and unusual patterns</li>
+      <li>Stores event history locally &mdash; your data stays on your server</li>
+      <li>Alerts you when something looks wrong</li>
+    </ul>
+    <p>
+      It will not replace a full analytics suite. But if you need a sanity check on your billing &mdash; something that
+      says "revenue dropped 40% in the last hour and here is why" &mdash; BillingWatch does that without the SaaS bill.
+    </p>
+
+    <h2>Quick Install</h2>
+    <p>You need Python 3.8+, a Stripe account, and a server (or localhost for testing).</p>
+
+    <pre><code># Clone and install
+git clone https://github.com/rmbell09-lang/billingwatch
+cd billingwatch
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env: add STRIPE_WEBHOOK_SECRET and STRIPE_API_KEY
+
+# Start the server
+python app.py</code></pre>
+
+    <p>Then add your BillingWatch webhook URL to Stripe:</p>
+    <ol>
+      <li>Go to <strong>Stripe Dashboard &rarr; Developers &rarr; Webhooks</strong></li>
+      <li>Click <strong>Add endpoint</strong></li>
+      <li>Enter your server URL: <code>https://your-server.com/stripe-webhook/</code></li>
+      <li>Select events: <code>payment_intent.succeeded</code>, <code>invoice.payment_failed</code>, <code>customer.subscription.deleted</code></li>
+      <li>Copy the signing secret into your <code>.env</code> as <code>STRIPE_WEBHOOK_SECRET</code></li>
+    </ol>
+
+    <p>That is it. Stripe starts sending events, BillingWatch processes them.</p>
+
+    <h2>Anomaly Detection: How It Works</h2>
+    <p>
+      BillingWatch maintains a rolling baseline of your payment activity. When incoming events deviate significantly
+      from that baseline &mdash; failed payment rate spikes, revenue drops, unusual charge patterns &mdash; it flags them.
+    </p>
+    <p>
+      This catches real problems: webhook delivery failures, Stripe configuration mistakes, payment processor outages,
+      and the kind of subtle revenue bleed that is easy to miss when you are not watching a dashboard all day.
+    </p>
+
+    <h2>Self-Hosted Means You Own Your Data</h2>
+    <p>
+      Every Baremetrics integration means your Stripe API key and full billing history sit on someone else's servers.
+      For most teams this is fine. But if you are handling sensitive subscription data, operating in a regulated industry,
+      or just prefer to keep things in-house, self-hosting is not optional &mdash; it is required.
+    </p>
+    <p>
+      BillingWatch stores everything locally. No external API calls except back to Stripe for verification.
+      Your billing data does not leave your infrastructure.
+    </p>
+
+    <div class="cta-box">
+      <h3>Get Started</h3>
+      <p>
+        BillingWatch is free, open-source, and MIT licensed.
+        Deploy it in 10 minutes and stop paying for Stripe monitoring you can run yourself.
+      </p>
+      <p>
+        <strong>&rarr; <a href="https://github.com/rmbell09-lang/billingwatch">github.com/rmbell09-lang/billingwatch</a></strong>
+      </p>
+      <p>Stars, issues, and PRs welcome.</p>
+    </div>
+
+  </div>
+</body>
+</html>
