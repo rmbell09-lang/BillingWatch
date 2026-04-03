@@ -8,6 +8,7 @@
 [![Stripe](https://img.shields.io/badge/stripe-webhook--powered-635bff.svg)](https://stripe.com/)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg)](https://hub.docker.com/)
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/rmbell09-lang/BillingWatch&referral=rmbell09-lang)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/rmbell09-lang/BillingWatch)
 
 **Catch billing bugs, dunning failures, and fraud before they hit your churn metrics — entirely on your own machine.**
 
@@ -62,6 +63,12 @@ BillingWatch is for makers who want **billing QA** (not analytics) with zero Saa
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/rmbell09-lang/BillingWatch&referral=rmbell09-lang)
 
 No local setup required. Railway will prompt for your `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` on deploy.
+
+### ☁️ One-Click Deploy on Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/rmbell09-lang/BillingWatch)
+
+Free tier available. Render will read `render.yaml` automatically and prompt for env vars on first deploy.
 
 
 ### Requirements
@@ -260,7 +267,7 @@ BillingWatch/
 
 ### v1.1 (In Progress)
 - 📧 **Email Digest** — daily/weekly anomaly summary (endpoint live, SMTP config needed)
-- ☁️ **Render.com 1-Click Deploy** — `render.yaml` + deploy button
+- ☁️ **Render.com 1-Click Deploy** — `render.yaml` + deploy button ✅
 - 🔍 **Webhook Event Explorer UI** — searchable, filterable event log
 
 ### v1.2 (Planned)
