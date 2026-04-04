@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/billingwatch.svg)](https://pypi.org/project/billingwatch/)
+
 # 🔍 BillingWatch — Self-Hosted Stripe Billing Anomaly Detector
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
