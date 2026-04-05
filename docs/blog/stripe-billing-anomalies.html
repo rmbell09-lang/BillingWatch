@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 Stripe Billing Anomalies That Cost Real Money (And How to Catch Them) — BillingWatch</title>
+  <meta name="description" content="Webhook delivery failures, duplicate charges from retry storms, failed payment dunning gaps, chargeback spikes, and abnormal refund ratios — five Stripe anomalies that drain revenue silently, and how to detect them.">
+  <link rel="alternate" type="application/atom+xml" title="BillingWatch Blog" href="../feed.xml">
+  <style>
+    body { background: #0a0e1a; color: #e8edf5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; line-height: 1.7; }
+    nav { background: #111827; border-bottom: 1px solid #1e2d45; padding: 14px 0; }
+    nav .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 24px; }
+    nav a { color: #60a5fa; text-decoration: none; font-size: 0.9rem; }
+    nav .brand { font-weight: 700; font-size: 1.1rem; color: #e8edf5; }
+    .container { max-width: 860px; margin: 0 auto; padding: 48px 20px; }
+    .back { display: inline-block; color: #60a5fa; text-decoration: none; font-size: 0.9rem; margin-bottom: 32px; }
+    .back:hover { text-decoration: underline; }
+    .post-meta { color: #8899bb; font-size: 0.9rem; margin-bottom: 32px; }
+    .tag { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-right: 6px; }
+    h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin: 48px 0 16px; color: #60a5fa; border-left: 4px solid #3b82f6; padding-left: 16px; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 24px 0 10px; color: #c9d7f0; }
+    p { margin-bottom: 16px; color: #c9d7f0; }
+    ul { margin: 0 0 16px 24px; color: #c9d7f0; }
+    ul li { margin-bottom: 6px; }
+    code { background: #1a2235; border: 1px solid #1e2d45; color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.88em; }
+    .impact-box { background: #111827; border: 1px solid #1e2d45; border-left: 4px solid #ef4444; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .impact-box strong { color: #ef4444; }
+    .anomaly-num { display: inline-block; background: #1e3a5f; color: #60a5fa; font-weight: 700; font-size: 0.8rem; padding: 3px 10px; border-radius: 12px; margin-bottom: 8px; }
+    .cta { background: #111827; border: 1px solid #3b82f6; border-radius: 12px; padding: 32px; margin: 48px 0 0; text-align: center; }
+    .cta h2 { border: none; padding: 0; color: #e8edf5; font-size: 1.4rem; }
+    .cta p { color: #8899bb; }
+    .cta a { display: inline-block; background: #3b82f6; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px; }
+    .cta a:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <span class="brand">🔍 BillingWatch</span>
+    <a href="../index.html">Home</a>
+    <a href="index.html">Blog</a>
+    <a href="https://github.com/rmbell09-lang/BillingWatch">GitHub</a>
+  </div>
+</nav>
+<div class="container">
+  <a class="back" href="index.html">← Back to Blog</a>
+
+  <h1>5 Stripe Billing Anomalies That Cost Real Money (And How to Catch Them)</h1>
+  <div class="post-meta">
+    📅 April 5, 2026 · ⏱ 6 min read
+    <br><br>
+    <span class="tag">stripe</span>
+    <span class="tag">anomaly-detection</span>
+    <span class="tag">webhook</span>
+    <span class="tag">open-source</span>
+  </div>
+
+  <p>Stripe is rock-solid infrastructure. But the code <em>around</em> Stripe — your webhook handlers, retry logic, dunning flows — is where anomalies hide. These aren't crashes or 500s. They're silent, they accumulate, and by the time you notice them in your bank account it's already been weeks.</p>
+
+  <p>Here are five billing anomalies that show up in Stripe-powered apps, why they drain revenue, and how to detect them before the damage compounds.</p>
+
+  <h2><span class="anomaly-num">Anomaly #1</span> Webhook Delivery Failures Causing Missed Subscription Activations</h2>
+
+  <h3>What it is</h3>
+  <p>Stripe sends a <code>customer.subscription.created</code> or <code>invoice.payment_succeeded</code> webhook to your server — but your endpoint was down, returned a 5xx, or timed out. Stripe retries for 72 hours, but if your handler stays broken, the event is abandoned. The subscription in Stripe is active. Your app doesn't know about it.</p>
+
+  <h3>Why it costs money</h3>
+  <p>The customer paid. Stripe collected the money. But your app never provisioned their account — so they can't use what they paid for. Best case: they open a support ticket and you fix it manually. Worst case: they dispute the charge and you eat a chargeback fee on top of the lost revenue.</p>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> Even at 1% webhook failure rate on a $49/mo plan with 500 active subscribers, that's $245/month in silently broken activations — plus chargeback exposure.
+  </div>
+
+  <h3>How BillingWatch detects it</h3>
+  <p>BillingWatch monitors your Stripe webhook event log for delivery failures and stuck retries. When a critical event (<code>invoice.payment_succeeded</code>, <code>customer.subscription.created</code>) hasn't been acknowledged within 30 minutes, it fires an alert before Stripe gives up.</p>
+
+  <h2><span class="anomaly-num">Anomaly #2</span> Duplicate Charges from Retry Storms</h2>
+
+  <h3>What it is</h3>
+  <p>Your payment flow calls <code>stripe.PaymentIntent.create()</code>. The network times out before you get a response. Your code retries. Stripe processed both. Now the customer has two charges.</p>
+
+  <h3>Why it costs money</h3>
+  <p>Customers who notice duplicate charges dispute them immediately. Each chargeback costs $15–$35 in dispute fees, and enough of them can trigger Stripe's elevated dispute monitoring (which adds further fees and restrictions). Even when customers don't dispute, refunding duplicates takes ops time and erodes trust.</p>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> A retry storm during a payment outage can generate dozens of duplicates in minutes. 30 duplicate charges at $35 dispute fee each = $1,050 in fees before you've refunded a dollar.
+  </div>
+
+  <h3>How BillingWatch detects it</h3>
+  <p>BillingWatch flags when the same customer has two successful charges within a configurable window (default: 10 minutes) for the same amount. Immediate alert lets you issue proactive refunds before customers notice and dispute.</p>
+
+  <h2><span class="anomaly-num">Anomaly #3</span> Failed Payments Not Triggering Dunning</h2>
+
+  <h3>What it is</h3>
+  <p>Stripe fires <code>invoice.payment_failed</code>. Your dunning logic is supposed to send a recovery email and update the subscription status. It doesn't — because the webhook handler had a bug, your email provider was rate-limiting, or the customer record lookup failed silently.</p>
+
+  <h3>Why it costs money</h3>
+  <p>Failed subscriptions that don't get dunned slip into involuntary churn. The customer's card declined, they got no email, their access stays up (if you're not enforcing status), and the failed invoice stacks up. Recovery rate drops as time passes.</p>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> Industry average recovers 60–70% of failed payments with good dunning. Silent dunning failures cut that to near zero. On 100 monthly failures at $49/mo, that's $3,000+/month in preventable churn.
+  </div>
+
+  <h3>How BillingWatch detects it</h3>
+  <p>BillingWatch cross-references <code>invoice.payment_failed</code> events against your dunning system's outbound logs. If a payment fails but no dunning action fires within 15 minutes, it triggers an alert so you can intervene manually before the window closes.</p>
+
+  <h2><span class="anomaly-num">Anomaly #4</span> Chargeback Spikes Indicating Fraud</h2>
+
+  <h3>What it is</h3>
+  <p>Stripe's dispute rate starts climbing — but not gradually. It spikes over 2–3 days. This is the fingerprint of a stolen card ring: someone bought a list of cards, your app is the test target, and the real cardholders are now disputing.</p>
+
+  <h3>Why it costs money</h3>
+  <p>Each dispute costs $15–$35. Stripe's dispute threshold is 0.75% (Visa) — above that, you're in elevated monitoring with additional fees. At 1%+, you risk losing Stripe access entirely. A 3-day fraud spike can generate enough chargebacks to push you into a monitoring program that takes months to exit.</p>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> 50 chargebacks at $25 average fee = $1,250 in fees, ignoring the disputed revenue itself. If it triggers monitoring, add $5–$10/chargeback on all future disputes for 12 months.
+  </div>
+
+  <h3>How BillingWatch detects it</h3>
+  <p>BillingWatch calculates a rolling 7-day dispute rate and alerts when it crosses configurable thresholds (default: 0.5% warning, 0.75% critical). Early detection gives you time to add friction, review signups, and contact Stripe proactively before hitting their automated thresholds.</p>
+
+  <h2><span class="anomaly-num">Anomaly #5</span> Abnormal Refund Ratios</h2>
+
+  <h3>What it is</h3>
+  <p>Your refund rate climbs above its normal baseline — but not because of a bug. It's a product signal. A pricing page was confusing, a feature broke silently, a trial-to-paid conversion was misleading. Customers are paying, then immediately requesting refunds.</p>
+
+  <h3>Why it costs money</h3>
+  <p>Beyond the direct revenue loss, high refund rates signal that revenue metrics are overstated. If you're tracking MRR from Stripe and 15% of charges get refunded within 48 hours, your actual MRR is materially lower than your dashboard shows. Decisions built on overstated MRR compound the problem.</p>
+
+  <div class="impact-box">
+    <strong>Real-dollar impact:</strong> If your product does $10k MRR and refund rate climbs from 3% to 12%, you've lost $900/month in realized revenue — but your MRR dashboard still shows $10k. Silent erosion.
+  </div>
+
+  <h3>How BillingWatch detects it</h3>
+  <p>BillingWatch tracks refund ratio as a rolling metric — refunds issued vs. charges processed — and alerts when it deviates more than 2 standard deviations from your historical baseline. Catch the spike early enough and you can trace it to a specific change that shipped that week.</p>
+
+  <div class="cta">
+    <h2>Stop Finding These Anomalies in Your Bank Statement</h2>
+    <p>BillingWatch is open-source, self-hosted, and connects to your Stripe account in under 5 minutes. Deploy on Railway or Render — free tier handles most indie SaaS volumes.</p>
+    <a href="https://github.com/rmbell09-lang/BillingWatch">View on GitHub →</a>
+  </div>
+</div>
+</body>
+</html>
